@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
+
+def main(argv)
+
+  # TODO: parse arguments
+
+  
+  puts Vagrant::Tools.list_machines
+end
+
+
+if __FILE__ == $0
+  main(ARGV)
+end
