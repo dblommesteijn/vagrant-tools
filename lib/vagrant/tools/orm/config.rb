@@ -4,10 +4,12 @@ module Vagrant
 
       class Config
 
+        attr_accessor :name
+
         def initialize(config_path)
           @config_path = config_path
           @machines = Dir["#{@config_path}/machines/*"].flat_map{|t| Machine.new(t)}
-          puts config_path
+          self.name = File.basename(File.absolute_path("#{config_path}/../"))
         end
 
         def names
@@ -15,7 +17,8 @@ module Vagrant
         end
 
         def to_outputs
-          @config_path
+          machines = @machines.map(&:to_outputs).join(" ")
+          "#{self.name}:\n#{machines}"
         end
 
       end

@@ -12,7 +12,7 @@ module Vagrant
           @provider_path = provider_path
           @id_file = "#{@provider_path}/id"
           self.id = File.read(@id_file) if self.valid?
-          puts self.id
+          @process = nil
         end
 
         def valid?
@@ -20,15 +20,26 @@ module Vagrant
         end
 
         def process
-          ret = nil
+          return @process unless @process.nil?
           Sys::ProcTable.ps do |p|
-            ret = p if p.cmdline.include?(self.id)
+            @process = p if p.cmdline.include?(self.id)
           end
-          ret
+          @process
         end
 
         def to_outputs
-          @provider_path
+          ret = []
+          if self.valid?
+            p = self.process
+            if p.nil?
+              ret << "vmid: #{self.id}"
+            else
+              ret << "pid: #{p.pid}"
+            end
+          else
+            ret << "never started"
+          end
+          ret.join
         end
 
       end

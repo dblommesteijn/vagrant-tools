@@ -10,7 +10,6 @@ module Vagrant
           @machine_path = machine_path
           self.name = File.basename(machine_path)
           @provider = Dir["#{@machine_path}/*"].flat_map{|t| Provider.new(t)}
-          puts self.name
         end
 
         def ids
@@ -22,7 +21,8 @@ module Vagrant
         end
 
         def to_outputs
-          @machine_path
+          provider = @provider.map(&:to_outputs).join(" ")
+          "- #{self.name} (#{provider})\n"
         end
 
       end

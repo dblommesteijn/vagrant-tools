@@ -16,9 +16,11 @@ module Vagrant
         
 
         ret = []
+        ret << @dirs.map{|t| "#{t.to_outputs}\n"}  
+        
         # full:
         # if output[:long]
-        #   ret << @dirs.map{|t| "#{t.to_outputs}\n"}  
+        #  
         # else
         #   ret << @dirs.map{|t| "#{File.basename(File.absolute_path(t+ "/../"))}\n"}
         # end
