@@ -1,12 +1,36 @@
 #!/usr/bin/env ruby
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
+require 'optparse'
+
 
 def main(argv)
+  options = {}
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = "Usage: vagrant-tools [options]"
+    # verbose
+    options[:verbose] = false
+    opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+      options[:verbose] = v
+    end
+    # prefix
+    options[:prefix] = ENV["HOME"]
+    opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
+      options[:prefix] = v
+    end
 
-  # TODO: parse arguments
+    # opts.on("-t", "--time [TIME]", Time, "Begin execution at given time") do |time|
+    # end
 
-  
+  end
+  opt_parser.parse!
+
+  unless File.exists?(options[:prefix])
+    puts "Prefix file or directory not found (try --help)"
+    # puts opt_parser
+    exit 1
+  end
+
   puts Vagrant::Tools.list_machines
 end
 
