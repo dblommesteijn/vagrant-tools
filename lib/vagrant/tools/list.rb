@@ -1,5 +1,4 @@
 require 'open3'
-require 'sys/proctable'
 
 module Vagrant
   module Tools
@@ -18,11 +17,11 @@ module Vagrant
 
         ret = []
         # full:
-        if output[:long]
-          ret << @dirs.map{|t| "#{t.to_outputs}\n"}  
+        # if output[:long]
+        #   ret << @dirs.map{|t| "#{t.to_outputs}\n"}  
         # else
         #   ret << @dirs.map{|t| "#{File.basename(File.absolute_path(t+ "/../"))}\n"}
-        end
+        # end
         ret.join
       end
 

@@ -3,6 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + "/tools/list")
 require File.expand_path(File.dirname(__FILE__) + "/tools/version")
 require File.expand_path(File.dirname(__FILE__) + "/tools/orm/config")
 require File.expand_path(File.dirname(__FILE__) + "/tools/orm/machine")
+require File.expand_path(File.dirname(__FILE__) + "/tools/orm/provider")
 
 
 module Vagrant

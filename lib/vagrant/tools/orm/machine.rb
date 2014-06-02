@@ -4,8 +4,21 @@ module Vagrant
 
       class Machine
 
+        attr_accessor :name
+
         def initialize(machine_path)
           @machine_path = machine_path
+          self.name = File.basename(machine_path)
+          @provider = Dir["#{@machine_path}/*"].flat_map{|t| Provider.new(t)}
+          puts self.name
+        end
+
+        def ids
+          @provider.map(&:id)
+        end
+
+        def processes
+          @provider.map(&:process)
         end
 
         def to_outputs
