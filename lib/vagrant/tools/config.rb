@@ -3,12 +3,13 @@ module Vagrant
 
     class Config
 
-      attr_accessor :prefix, :verbose, :output
+      attr_accessor :prefix, :verbose, :output, :options
 
       def initialize
         @errors = {}
         self.prefix = ENV["HOME"]
         self.verbose = false
+        self.output = {machine: false, long: false}
       end
 
       def verify?

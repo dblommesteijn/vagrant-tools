@@ -17,11 +17,15 @@ def main(argv)
         c.prefix = v
       end
       # output filters
-      c.output = {}
       # long format
       opts.on("-l", "Long format") do |v|
         c.output[:long] = true
       end
+      # list machines
+      opts.on("-m", "List machines") do |v|
+        c.output[:machine] = true
+      end
+
     end
     opt_parser.parse!
   end
@@ -35,7 +39,7 @@ def main(argv)
   # puts Vagrant::Tools.list_configs.map{|t| "#{t}\n"}
 
   ls = Vagrant::Tools::List.new
-  puts ls.find_vagrant_dirs.to_outputs
+  puts ls.find_vagrant_configs.to_outputs
 end
 
 
