@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
+require 'optparse'
+
+
+def main(argv)
+  # set configuration
+  vgtools_cfg = Vagrant::Tools.config do |c|
+    # defaults
+    c.prefix = ENV["HOME"]
+    c.verbose = false
+    # getopts
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: vgls [options]"
+      opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
+        c.prefix = v
+      end
+      # output filters
+      c.output = {}
+      # long format
+      opts.on("-l", "Long format") do |v|
+        c.output[:long] = true
+      end
+    end
+    opt_parser.parse!
+  end
+
+  unless vgtools_cfg.verify?
+    puts vgtools_cfg.error_messages
+    exit 1
+  end
+
+
+  # puts Vagrant::Tools.list_configs.map{|t| "#{t}\n"}
+
+  ls = Vagrant::Tools::List.new
+  puts ls.find_vagrant_dirs.to_outputs
+end
+
+
+if __FILE__ == $0
+  main(ARGV)
+end
