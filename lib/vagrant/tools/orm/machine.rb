@@ -21,7 +21,7 @@ module Vagrant
         end
 
         def to_outputs
-          provider = @provider.map(&:to_outputs).join(" ")
+          provider = @provider.map(&:to_outputs).join("")
           "- #{self.name} (#{provider})\n"
         end
 

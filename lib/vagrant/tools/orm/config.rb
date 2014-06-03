@@ -17,8 +17,8 @@ module Vagrant
         end
 
         def to_outputs
-          machines = @machines.map(&:to_outputs).join(" ")
-          "#{self.name}:\n#{machines}"
+          machines = @machines.map(&:to_outputs).join("")
+          "#{self.name}: (#{@config_path})\n#{machines}"
         end
 
       end

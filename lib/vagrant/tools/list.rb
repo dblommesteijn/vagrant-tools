@@ -13,17 +13,8 @@ module Vagrant
 
       def to_outputs
         output = Vagrant::Tools.get_config.output
-        
-
         ret = []
-        ret << @dirs.map{|t| "#{t.to_outputs}\n"}  
-        
-        # full:
-        # if output[:long]
-        #  
-        # else
-        #   ret << @dirs.map{|t| "#{File.basename(File.absolute_path(t+ "/../"))}\n"}
-        # end
+        ret << @dirs.map{|t| "#{t.to_outputs}"}  
         ret.join
       end
 
