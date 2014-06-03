@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
+require 'optparse'
+
+
+def main(argv)
+  # set configuration
+  vgtools_cfg = Vagrant::Tools.config do |c|
+    # defaults
+    c.prefix = ENV["HOME"]
+    c.verbose = false
+    # getopts
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: vgctl -t [] [options]"
+      opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
+        c.prefix = v
+      end
+
+      # list machines
+      opts.on("-v", "Verbose output") do |v|
+        c.verbose = true
+      end
+      # target specific config (Vagrantfile)
+      opts.on("-t", "--target TARGET", String, "Target specific Vagrantfile directory") do |v|
+        c.target = v
+      end
+      # vagrant command
+      opts.on("-c", "--cmd COMMAND", String, "Run command relative to -t dir (-c vagrant up)") do |v|
+        c.cmd = v
+      end
+
+
+    end
+    begin
+      opt_parser.parse!
+    rescue OptionParser::MissingArgument => e
+      puts e.message
+      exit 1
+    rescue OptionParser::InvalidOption => e
+      puts e.message
+      exit 1
+    end
+
+    ls = Vagrant::Tools::List.new
+    ls.find_by_project_root(c.target.to_sym)
+
+  end
+
+  unless vgtools_cfg.verify?
+    puts vgtools_cfg.error_messages
+    exit 1
+  end
+
+  # c = Vagrant::Tools.get_config
+  # puts c.target
+  # puts c.cmd
+
+
+  # ls = Vagrant::Tools::List.new
+  # puts ls.find_vagrant_configs.to_outputs
+end
+
+
+if File.basename(__FILE__) == File.basename($0)
+  begin
+    main(ARGV)
+  rescue Interrupt
+    exit 0
+  end
+end

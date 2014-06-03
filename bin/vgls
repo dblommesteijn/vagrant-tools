@@ -30,6 +30,9 @@ def main(argv)
       opts.on("-v", "Verbose output") do |v|
         c.verbose = true
       end
+      opts.on("-t", "--target TARGET", String, "Target specific Vagrantfile directory") do |v|
+        c.target = v
+      end
 
     end
     begin
@@ -51,7 +54,7 @@ def main(argv)
 
 
   ls = Vagrant::Tools::List.new
-  puts ls.find_vagrant_configs.to_outputs
+  puts ls.to_outputs
 end
 
 
