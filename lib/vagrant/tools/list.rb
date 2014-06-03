@@ -14,17 +14,20 @@ module Vagrant
       def to_outputs
         output = Vagrant::Tools.get_config.output
         ret = []
-        ret << @dirs.map{|t| "#{t.to_outputs}"}  
+        ret << @dirs.map{|t| "#{t.to_outputs}"}
         ret.join
       end
 
       def find_vagrant_configs
         return @dirs unless @dirs.empty?
-        prefix = Vagrant::Tools.get_config.prefix
+        cfg = Vagrant::Tools.get_config
+        prefix = cfg.prefix
         @dirs = []
-        Open3.popen3("find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\"") do |stdin, stdout, stderr|
+        cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
+        puts cmd if cfg.verbose
+        Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
-          stdout.read.split("\n").each do |line| 
+          stdout.read.split("\n").each do |line|
             @dirs << Orm::Config.new(line)
           end
           stderr.close_read

@@ -22,6 +22,7 @@ module Vagrant
 
         def to_outputs
           provider = @provider.map(&:to_outputs).join("")
+          return "- #{self.name} (no provider found)\n" if provider.empty?
           "- #{self.name} (#{provider})\n"
         end
 

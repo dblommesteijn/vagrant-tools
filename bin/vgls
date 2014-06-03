@@ -16,6 +16,7 @@ def main(argv)
       opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
       end
+
       # output filters
       # long format
       opts.on("-l", "Long format") do |v|
@@ -25,9 +26,18 @@ def main(argv)
       opts.on("-m", "List machines") do |v|
         c.output[:machine] = true
       end
+      # list machines
+      opts.on("-v", "Verbose output") do |v|
+        c.verbose = true
+      end
 
     end
-    opt_parser.parse!
+    begin
+      opt_parser.parse!
+    rescue OptionParser::InvalidOption => e
+      puts e.message
+      exit 1
+    end
   end
 
   unless vgtools_cfg.verify?
@@ -35,14 +45,20 @@ def main(argv)
     exit 1
   end
 
+  # c = Vagrant::Tools.get_config
+  # puts c.target
+  # puts c.cmd
 
-  # puts Vagrant::Tools.list_configs.map{|t| "#{t}\n"}
 
   ls = Vagrant::Tools::List.new
   puts ls.find_vagrant_configs.to_outputs
 end
 
 
-if __FILE__ == $0
-  main(ARGV)
+if File.basename(__FILE__) == File.basename($0)
+  begin
+    main(ARGV)
+  rescue Interrupt
+    exit 0
+  end
 end
