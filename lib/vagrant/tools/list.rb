@@ -14,35 +14,7 @@ module Vagrant
       end
 
       def find_by_project_root(project_root_name)
-        puts "find_by_project_root: #{project_root_name}" if @cfg.verbose
-        if @dirs.include?(project_root_name)
-          cs = @dirs[project_root_name]
-          puts cs.inspect if @cfg.verbose
-          raise "multiple configs found" if cs.size > 1
-        end
-      end
-
-      def to_outputs
-        output = @cfg.output
-        ret = []
-        if @cfg.target.nil?
-          # print all
-          ret << @dirs.flat_map{|k,t| t.map(&:to_outputs)}
-        else
-          # print only selected target
-          tmp = @cfg.target.split("_")
-          if tmp.size > 1
-            n = tmp.first.to_sym
-            o = (tmp.last.to_i - 1)
-            if @dirs.include?(n)
-              ret << @dirs[n][o].to_outputs
-            end
-          else
-            n = @cfg.target.to_sym
-            ret << @dirs[n].map(&:to_outputs).first
-          end          
-        end
-        ret.join
+        self.get_config_without_offset(project_root_name)
       end
 
       def find_vagrant_configs
@@ -50,7 +22,7 @@ module Vagrant
         prefix = @cfg.prefix
         @dirs = {}
         cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
-        puts cmd if @cfg.verbose
+        puts "Finding vagrant configs: `#{cmd}`... (caching find results? -x)" if @cfg.verbose
         Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
           stdout.read.split("\n").each do |line|
@@ -64,6 +36,37 @@ module Vagrant
           stderr.close_read
         end
         self
+      end
+
+      def to_outputs
+        ret = []
+        if @cfg.target.nil?
+          # print all
+          ret << @dirs.flat_map{|k,t| t.map(&:to_outputs)}
+        else
+          ret << self.get_config_without_offset(@cfg.target).to_outputs      
+        end
+        ret.join
+      end
+
+      protected
+
+      def get_config_without_offset(name)
+
+        tmp = name.split("_")
+        if tmp.size > 1
+          n = tmp.first
+          o = tmp.last.to_i - 1
+          if @dirs.include?(n)
+            return @dirs[n][o]
+          end
+        # elsif @dirs[n].nil?
+          # puts @dirs.inspect
+        else
+          n = name
+          return @dirs[n].first
+        end
+        nil
       end
 
     end

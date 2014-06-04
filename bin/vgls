@@ -13,31 +13,31 @@ def main(argv)
     # getopts
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: vgls [options]"
-      opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
+      opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
       end
-
-      # output filters
-      # long format
-      opts.on("-l", "Long format") do |v|
-        c.output[:long] = true
-      end
-      # list machines
-      opts.on("-m", "List machines") do |v|
-        c.output[:machine] = true
-      end
-      # list machines
-      opts.on("-v", "Verbose output") do |v|
+      opts.on("-v", "--verbose", "Verbose output") do |v|
         c.verbose = true
       end
-      opts.on("-t", "--target TARGET", String, "Target specific Vagrantfile directory") do |v|
+      opts.on("-t", "--target TARGET", String, "Target specific config (Vagrantfile dir)") do |v|
         c.target = v
+      end
+      opts.on("-x", "--refresh-cache", String, "Refresh cached results") do |v|
+        c.target = v
+      end
+
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit 1
       end
 
     end
     begin
       opt_parser.parse!
     rescue OptionParser::InvalidOption => e
+      puts e.message
+      exit 1
+    rescue OptionParser::MissingArgument => e
       puts e.message
       exit 1
     end
@@ -48,10 +48,10 @@ def main(argv)
     exit 1
   end
 
-  # c = Vagrant::Tools.get_config
-  # puts c.target
-  # puts c.cmd
-
+  cfg = Vagrant::Tools.get_config 
+  if cfg.verbose
+    puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
+  end
 
   ls = Vagrant::Tools::List.new
   puts ls.to_outputs

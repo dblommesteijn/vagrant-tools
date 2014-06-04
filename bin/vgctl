@@ -12,13 +12,14 @@ def main(argv)
     c.verbose = false
     # getopts
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: vgctl -t [] [options]"
-      opts.on("-p", "--prefix [DIR]", String, "Define prefix (default $HOME)") do |v|
+      opts.banner = "Usage: vgctl [options]"
+
+      opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
       end
 
       # list machines
-      opts.on("-v", "Verbose output") do |v|
+      opts.on("-v", "--verbose", "Verbose output") do |v|
         c.verbose = true
       end
       # target specific config (Vagrantfile)
@@ -26,11 +27,18 @@ def main(argv)
         c.target = v
       end
       # vagrant command
-      opts.on("-c", "--cmd COMMAND", String, "Run command relative to -t dir (-c vagrant up)") do |v|
+      opts.on("-c", "--cmd COMMAND", String, "Run vagrant command relative to -t TARGET (-c \"up\")") do |v|
         c.cmd = v
       end
 
+      opts.on("-x", "--refresh-cache", String, "Refresh cached results") do |v|
+        c.target = v
+      end
 
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit 1
+      end
     end
     begin
       opt_parser.parse!
@@ -41,10 +49,6 @@ def main(argv)
       puts e.message
       exit 1
     end
-
-    ls = Vagrant::Tools::List.new
-    ls.find_by_project_root(c.target.to_sym)
-
   end
 
   unless vgtools_cfg.verify?
@@ -52,13 +56,21 @@ def main(argv)
     exit 1
   end
 
-  # c = Vagrant::Tools.get_config
-  # puts c.target
-  # puts c.cmd
+  cfg = Vagrant::Tools.get_config 
 
-
-  # ls = Vagrant::Tools::List.new
-  # puts ls.find_vagrant_configs.to_outputs
+  if cfg.verbose
+    puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
+  end
+  
+  ls = Vagrant::Tools::List.new
+  config = ls.find_by_project_root(cfg.target)
+  if config.nil?
+    puts "target config not found"
+    exit
+  else
+    puts "executing: #{cfg.cmd}" if cfg.verbose
+  end
+  config.exec_command(cfg.cmd)
 end
 
 
