@@ -30,10 +30,17 @@ module Vagrant
           ret << @dirs.flat_map{|k,t| t.map(&:to_outputs)}
         else
           # print only selected target
-          n = @cfg.target.to_sym
-          if @dirs.include?(n)
-            ret << @dirs[n].map(&:to_outputs)
-          end
+          tmp = @cfg.target.split("_")
+          if tmp.size > 1
+            n = tmp.first.to_sym
+            o = (tmp.last.to_i - 1)
+            if @dirs.include?(n)
+              ret << @dirs[n][o].to_outputs
+            end
+          else
+            n = @cfg.target.to_sym
+            ret << @dirs[n].map(&:to_outputs).first
+          end          
         end
         ret.join
       end
@@ -51,6 +58,7 @@ module Vagrant
             orm_config = Orm::Config.new(line)
             n = orm_config.project_root_name
             @dirs[n] ||= []
+            orm_config.offset = @dirs[n].size + 1 if @dirs[n].size > 0
             @dirs[n] << orm_config
           end
           stderr.close_read
