@@ -14,13 +14,16 @@ module Vagrant
         self.cmd = nil
       end
 
-      def verify?
+      def verify?(&block)
+        # general checks
         @errors[:prefix] = "file does not exist" unless File.exists?(self.prefix)
         unless self.cmd.nil?
           if self.cmd.start_with?("vagrant")
             @errors[:cmd] = "all commands are prepended with `vagrant`"
           end
         end
+        # file specific checks
+        block.call(@errors)
         # @errors[:target] = "unknown target" if self.target.present? && 
         @errors.empty?
       end

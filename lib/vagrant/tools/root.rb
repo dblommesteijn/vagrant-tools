@@ -3,7 +3,7 @@ require 'open3'
 module Vagrant
   module Tools
 
-    class List
+    class Root
 
       LOOKUP_DIR = ".vagrant"
 

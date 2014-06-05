@@ -12,7 +12,7 @@ def main(argv)
     c.verbose = false
     # getopts
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: vgls [options]"
+      opts.banner = "Vagrant list, Usage: vgls [options]"
       opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
       end
@@ -43,7 +43,11 @@ def main(argv)
     end
   end
 
-  unless vgtools_cfg.verify?
+  verify = vgtools_cfg.verify? do |errors|
+    # if
+    # errors[:]
+  end
+  unless verify
     puts vgtools_cfg.error_messages
     exit 1
   end
@@ -53,7 +57,8 @@ def main(argv)
     puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
   end
 
-  ls = Vagrant::Tools::List.new
+  # output lists
+  root = Vagrant::Tools::Root.new
   puts ls.to_outputs
 end
 

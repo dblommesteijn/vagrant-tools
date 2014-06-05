@@ -12,7 +12,7 @@ def main(argv)
     c.verbose = false
     # getopts
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: vgctl [options]"
+      opts.banner = "Vagrant control, Usage: vgctl [options]"
 
       opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
@@ -50,26 +50,35 @@ def main(argv)
       exit 1
     end
   end
-
-  unless vgtools_cfg.verify?
+  cfg = Vagrant::Tools.get_config 
+  verify = vgtools_cfg.verify? do |errors|
+    # if cfg.target.nil? || cfg.target == "
+    errors[:target] = "target does not exist" if cfg.target.nil?
+    errors[:cmd] = "invalid" if cfg.cmd.nil? || cfg.cmd == ""
+    # errors[:]
+  end
+  unless verify
     puts vgtools_cfg.error_messages
     exit 1
   end
 
-  cfg = Vagrant::Tools.get_config 
+  
 
+  # print verbose message
   if cfg.verbose
     puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
   end
   
-  ls = Vagrant::Tools::List.new
-  config = ls.find_by_project_root(cfg.target)
+  # find config root by target name (project root name)
+  root = Vagrant::Tools::Root.new
+  config = root.find_by_project_root(cfg.target)
   if config.nil?
     puts "target config not found"
     exit
   else
     puts "executing: #{cfg.cmd}" if cfg.verbose
   end
+  # execute command relative to config
   config.exec_command(cfg.cmd)
 end
 
