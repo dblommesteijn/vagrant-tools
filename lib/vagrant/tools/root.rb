@@ -22,7 +22,7 @@ module Vagrant
         prefix = @cfg.prefix
         @dirs = {}
         cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
-        puts "Finding vagrant configs: `#{cmd}`... (caching find results? -x)" if @cfg.verbose
+        puts "Finding vagrant configs: `#{cmd}`..." if @cfg.verbose
         Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
           stdout.read.split("\n").each do |line|

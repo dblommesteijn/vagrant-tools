@@ -27,6 +27,12 @@ module Vagrant
         end
 
         def exec_command(cmd)
+          res = false
+          # NOTE: destroy requires an additonal -f flag (interactive tty otherwise)
+          if cmd.include?("destroy")
+            Helper.collect_input_yn_exit!("Destroying VM,")
+            cmd += " -f"
+          end
           cmd = "(cd #{self.project_root} && vagrant #{cmd})"
           puts cmd if @cfg.verbose
           Open3.popen3(cmd) do |stdin, stdout, stderr|

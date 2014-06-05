@@ -59,7 +59,7 @@ def main(argv)
 
   # output lists
   root = Vagrant::Tools::Root.new
-  puts ls.to_outputs
+  puts root.to_outputs
 end
 
 
