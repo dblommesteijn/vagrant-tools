@@ -16,11 +16,11 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 
 * Version (0.1.0) Current
 
-  * Filter only active/ inactive
   * Enable `vagrant ssh` interactive shell
 
 * Version (0.1.1)
-  
+
+  * Filter only active/ inactive
   * Add option to switch to .config path `vgctl -t target-box -c cd`
 
 
