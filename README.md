@@ -26,6 +26,10 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 
 ## Installation
 
+Install the latest version from the git repository, or install it via RubyGems
+
+#### From Source
+
 **Clone the git repository to your local machine.**
 
 ```bash
@@ -40,6 +44,17 @@ rake install
 # vgls and vgctl will be available system wide
 ```
 
+#### RubyGems
+
+**Get the package from RubyGems**
+
+```bash
+gem install vagrant-tools
+```
+
+
+## Usage
+
 **Run commands**
 
 ```bash
@@ -48,8 +63,6 @@ vgls
 # control vagrant
 vgctl
 ```
-
-## Usage
 
 Verbose, this will output operations to STDOUT
 
@@ -65,8 +78,8 @@ Change target configuration (find operation), base from where .vagrant configs a
 *NOTE: this will force cache refresh*
 
 ```bash
-vgls -p `$HOME`/path/to/your/repos
-vgctl -p `$HOME`/path/to/your/repos
+vgls -p $HOME/path/to/your/repos
+vgctl -p $HOME/path/to/your/repos
 ```
 
 Target or list vagrant config relative to a given config
