@@ -26,6 +26,9 @@ def main(argv)
       opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
         c.refresh_cache = v
       end
+      opts.on("-a", "--only-active", "Show only active VMs") do |v|
+        c.output[:only_active] = v
+      end
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
         exit 1
@@ -61,9 +64,12 @@ def main(argv)
   root = Vagrant::Tools::Root.new
   puts root.to_outputs
 
-  if root.cache.cache_old?
+  if root.cache.cache_old? 
     a = root.cache.cache_time_a
-    puts "Cache is %d days, %dh, %dm, and %ds old (consider refreshing -x)" % a
+    puts "Cache is %dd, %dh, %dm, and %ds old (consider refreshing -x)" % a
+  elsif cfg.verbose
+    a = root.cache.cache_time_a
+    puts "Cache is %dd, %dh, %dm, and %ds old" % a
   end
 
 end

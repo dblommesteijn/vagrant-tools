@@ -9,8 +9,8 @@ module Vagrant
         attr_accessor :name, :project_root, :offset, :config_path
 
         def initialize(config_path)
-          @cfg = Vagrant::Tools.get_config
           self.config_path = config_path
+          @cfg = Vagrant::Tools.get_config
           self.project_root = File.absolute_path("#{config_path}/../")
           @machines = Dir["#{self.config_path}/machines/*"].flat_map{|t| Machine.new(t)}
           self.name = File.basename(File.absolute_path("#{config_path}/../"))
@@ -40,7 +40,13 @@ module Vagrant
 
         def to_outputs
           machines = @machines.map(&:to_outputs).join("")
-          "#{self.project_root_name_with_offset} (#{@project_root})\n#{machines}"
+          if !@cfg.output[:only_active]
+            "#{self.project_root_name_with_offset} (#{@project_root})\n#{machines}"
+          else
+            if !machines.empty?
+              "#{self.project_root_name_with_offset} (#{@project_root})\n#{machines}"
+            end
+          end
         end
 
       end

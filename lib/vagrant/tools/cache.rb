@@ -21,6 +21,7 @@ module Vagrant
         return {} unless File.exists?(@filename)
         #TODO: read from file
         begin
+          puts "Reading cache file: `#{@filename}`" if @cfg.verbose
           json = JSON.parse(File.read(@filename), {symbolize_names: true})
           c_time = Time.at(json[:configs_date])
           puts "Cache time: `#{c_time}`" if @cfg.verbose

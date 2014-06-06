@@ -9,7 +9,7 @@ module Vagrant
         @errors = {}
         self.prefix = ENV["HOME"]
         self.verbose = false
-        self.output = {machine: false, long: false}
+        self.output = {machine: false, long: false, only_active: false}
         self.target = nil
         self.cmd = nil
       end
