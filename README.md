@@ -8,7 +8,7 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 
 ## Roadmap
 
-* Version (0.0.1)
+* Version (0.0.1) Current
 
   * Initial project
   * List all vagrant configurations
@@ -17,8 +17,8 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 * Version (0.0.2)
 
   * Filter only active/ inactive
-  * Enable `vagrant ssh`
-  * Add option to switch to .config path
+  * Enable `vagrant ssh` interactive shell
+  * Add option to switch to .config path `vgctl -t target-box -c cd`
 
 
 ## Installation
@@ -47,12 +47,6 @@ vgctl
 ```
 
 ## Usage
-
-List all vagrant configurations
-
-```bash
-vgls
-```
 
 Verbose, this will output operations to STDOUT
 
