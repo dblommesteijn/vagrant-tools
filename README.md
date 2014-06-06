@@ -8,16 +8,19 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 
 ## Roadmap
 
-* Version (0.0.1) Current
+* Version (0.0.1)
 
   * Initial project
   * List all vagrant configurations
   * Add basic controls for up/ halt/ destroy etc.
 
-* Version (0.0.2)
+* Version (0.1.0) Current
 
   * Filter only active/ inactive
   * Enable `vagrant ssh` interactive shell
+
+* Version (0.1.1)
+  
   * Add option to switch to .config path `vgctl -t target-box -c cd`
 
 
@@ -86,11 +89,9 @@ vgctl -x
 Run a vagrant command (-c prepends `vagrant ` to all commands)
 
 ```bash
-vgctl -t my-test-box -c up
-vgctl -t my-test-box -c halt
-vgctl -t my-test-box -c destroy
-# prompt [y/N]
-vgctl -t my-test-box -c status
+vgctl -t my-test-box -c list-commands
+# runs `vagrant list-commands` in the path of `my-test-box`
+# ... etc
 ```
 
 Print help file
@@ -109,7 +110,7 @@ Listing all vagrant configs, and starting VM
 vgls
 # execute `vagrant up` on path of `my-test-box`
 vgctl -t my-test-box -c up
-# TODO: no interactive shell working (`vagrant ssh is not working yet`)
+vgctl -t my-test-box -c ssh
 ```
 
 Destroy a running VM
@@ -119,6 +120,5 @@ Destroy a running VM
 vgls
 # execute `vagrant destroy` on path of `my-test-box`
 vgctl -t my-test-box -c destory
-# answer custom prompt [y/N]
 ```
 

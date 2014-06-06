@@ -27,24 +27,9 @@ module Vagrant
         end
 
         def exec_vagrant_command(cmd)
-          res = false
-          # NOTE: destroy requires an additonal -f flag (interactive tty otherwise)
-          if cmd.include?("destroy")
-            Helper.collect_input_yn_exit!("Destroying VM,")
-            cmd += " -f"
-          end
           cmd = "(cd #{self.project_root} && vagrant #{cmd})"
           puts cmd if @cfg.verbose
-          Open3.popen3(cmd) do |stdin, stdout, stderr|
-            stdin.close_write
-            # read smallest buffer, and flush output buffer (vagrant cmd)
-            while (data = stdout.read(1))
-              break if data.nil?
-              STDOUT.write data
-              STDOUT.flush
-            end
-            stderr.close_read
-          end
+          system(cmd)
         end
 
         def names
