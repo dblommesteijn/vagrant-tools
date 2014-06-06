@@ -15,6 +15,7 @@ def main(argv)
       opts.banner = "Vagrant list, Usage: vgls [options]"
       opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
+        c.refresh_cache = true
       end
       opts.on("-v", "--verbose", "Verbose output") do |v|
         c.verbose = true
@@ -25,7 +26,6 @@ def main(argv)
       opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
         c.refresh_cache = v
       end
-
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
         exit 1

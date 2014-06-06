@@ -16,24 +16,20 @@ def main(argv)
 
       opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
         c.prefix = v
+        c.refresh_cache = true
       end
-
-      # list machines
       opts.on("-v", "--verbose", "Verbose output") do |v|
         c.verbose = true
       end
-      # target specific config (Vagrantfile)
       opts.on("-t", "--target TARGET", String, "Target specific Vagrantfile directory") do |v|
         c.target = v
       end
-      # vagrant command
       opts.on("-c", "--cmd COMMAND", String, "Run vagrant command relative to -t TARGET (-c \"up\")") do |v|
         c.cmd = v
       end
       opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
         c.refresh_cache = v
       end
-
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
         exit 1
