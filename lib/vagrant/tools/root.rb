@@ -6,11 +6,14 @@ module Vagrant
 
     class Root
 
+      attr_accessor :cache
+
       LOOKUP_DIR = ".vagrant"
 
       def initialize
         @cfg = Vagrant::Tools.get_config
         @dirs = {}
+        self.cache = Cache.new
         self.find_vagrant_configs
       end
 
@@ -24,8 +27,7 @@ module Vagrant
           return @dirs
         end
         prefix = @cfg.prefix
-        cache = Cache.new
-        cache_configs = cache.get_config
+        cache_configs = self.cache.get_config
         # break if config found (unless refreshing)
         if !cache_configs.empty? && !@cfg.refresh_cache
           puts "Reading config from cache" if @cfg.verbose
@@ -46,7 +48,7 @@ module Vagrant
           end
           stderr.close_read
         end
-        cache.set_config(@dirs)
+        self.cache.set_config(@dirs)
         self
       end
 

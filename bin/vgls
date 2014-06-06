@@ -60,6 +60,12 @@ def main(argv)
   # output lists
   root = Vagrant::Tools::Root.new
   puts root.to_outputs
+
+  if root.cache.cache_old?
+    a = root.cache.cache_time_a
+    puts "Cache is %d days, %dh, %dm, and %ds old (consider refreshing -x)" % a
+  end
+
 end
 
 
