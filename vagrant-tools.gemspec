@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Vagrant::Tools::VERSION
   spec.authors       = ["Dennis Blommesteijn"]
   spec.email         = ["dennis@blommesteijn.com"]
-  spec.summary       = %q{Tools for Vagrant}
-  spec.description   = %q{Tools for Vagrant}
-  spec.homepage      = ""
+  spec.summary       = %q{Vagrant CLI configuration management tool for Unix}
+  spec.description   = %q{Vagrant CLI configuration management tool for Unix}
+  spec.homepage      = "https://github.com/dblommesteijn/vagrant-tools"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

@@ -27,8 +27,10 @@ module Vagrant
         end
 
         def exec_vagrant_command(cmd)
+          # TODO: add some cmd check?
           cmd = "(cd #{self.project_root} && vagrant #{cmd})"
           puts cmd if @cfg.verbose
+          # system call to command
           system(cmd)
         end
 

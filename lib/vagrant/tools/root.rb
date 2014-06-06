@@ -80,8 +80,6 @@ module Vagrant
           if @dirs.include?(n)
             return @dirs[n][o]
           end
-        # elsif @dirs[n].nil?
-          # puts @dirs.inspect
         else
           n = name
           return @dirs[n].first
