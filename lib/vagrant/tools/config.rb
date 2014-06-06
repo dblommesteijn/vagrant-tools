@@ -3,7 +3,7 @@ module Vagrant
 
     class Config
 
-      attr_accessor :prefix, :verbose, :output, :options, :target, :cmd
+      attr_accessor :prefix, :verbose, :output, :options, :target, :cmd, :refresh_cache
 
       def initialize
         @errors = {}

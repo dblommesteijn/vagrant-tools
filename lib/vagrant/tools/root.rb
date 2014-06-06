@@ -1,4 +1,5 @@
 require 'open3'
+require 'json'
 
 module Vagrant
   module Tools
@@ -18,23 +19,34 @@ module Vagrant
       end
 
       def find_vagrant_configs
-        return @dirs unless @dirs.empty?
+        unless @dirs.empty?
+          puts "Config already loaded (use -x to force reload)" if @cfg.verbose
+          return @dirs
+        end
         prefix = @cfg.prefix
-        @dirs = {}
+        cache = Cache.new
+        cache_configs = cache.get_config
+        # break if config found (unless refreshing)
+        if !cache_configs.empty? && !@cfg.refresh_cache
+          puts "Reading config from cache" if @cfg.verbose
+          cache_configs.each do |config|
+            # create new config instance
+            self.add_config_dirs(config)
+          end
+          return self 
+        end
+        # findin configs via find
         cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
         puts "Finding vagrant configs: `#{cmd}`..." if @cfg.verbose
         Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
-          stdout.read.split("\n").each do |line|
+          stdout.read.split("\n").each do |config|
             # create new config instance
-            orm_config = Orm::Config.new(line)
-            n = orm_config.project_root_name
-            @dirs[n] ||= []
-            orm_config.offset = @dirs[n].size + 1 if @dirs[n].size > 0
-            @dirs[n] << orm_config
+            self.add_config_dirs(config)
           end
           stderr.close_read
         end
+        cache.set_config(@dirs)
         self
       end
 
@@ -51,8 +63,16 @@ module Vagrant
 
       protected
 
-      def get_config_without_offset(name)
+      def add_config_dirs(config)
+        orm_config = Orm::Config.new(config)
+        n = orm_config.project_root_name
+        @dirs[n] ||= []
+        orm_config.offset = @dirs[n].size + 1 if @dirs[n].size > 0
+        @dirs[n] << orm_config
+        nil
+      end
 
+      def get_config_without_offset(name)
         tmp = name.split("_")
         if tmp.size > 1
           n = tmp.first

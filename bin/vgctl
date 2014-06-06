@@ -30,9 +30,8 @@ def main(argv)
       opts.on("-c", "--cmd COMMAND", String, "Run vagrant command relative to -t TARGET (-c \"up\")") do |v|
         c.cmd = v
       end
-
-      opts.on("-x", "--refresh-cache", String, "Refresh cached results") do |v|
-        c.target = v
+      opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
+        c.refresh_cache = v
       end
 
       opts.on_tail("-h", "--help", "Show this message") do
@@ -62,8 +61,6 @@ def main(argv)
     exit 1
   end
 
-  
-
   # print verbose message
   if cfg.verbose
     puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
@@ -79,7 +76,7 @@ def main(argv)
     puts "executing: #{cfg.cmd}" if cfg.verbose
   end
   # execute command relative to config
-  config.exec_command(cfg.cmd)
+  config.exec_vagrant_command(cfg.cmd)
 end
 
 

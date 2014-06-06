@@ -22,8 +22,8 @@ def main(argv)
       opts.on("-t", "--target TARGET", String, "Target specific config (Vagrantfile dir)") do |v|
         c.target = v
       end
-      opts.on("-x", "--refresh-cache", String, "Refresh cached results") do |v|
-        c.target = v
+      opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
+        c.refresh_cache = v
       end
 
       opts.on_tail("-h", "--help", "Show this message") do

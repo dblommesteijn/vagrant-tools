@@ -6,13 +6,13 @@ module Vagrant
 
       class Config
 
-        attr_accessor :name, :project_root, :offset
+        attr_accessor :name, :project_root, :offset, :config_path
 
         def initialize(config_path)
           @cfg = Vagrant::Tools.get_config
-          @config_path = config_path
+          self.config_path = config_path
           self.project_root = File.absolute_path("#{config_path}/../")
-          @machines = Dir["#{@config_path}/machines/*"].flat_map{|t| Machine.new(t)}
+          @machines = Dir["#{self.config_path}/machines/*"].flat_map{|t| Machine.new(t)}
           self.name = File.basename(File.absolute_path("#{config_path}/../"))
           self.offset = 0
         end
@@ -26,7 +26,7 @@ module Vagrant
           "#{self.project_root_name}#{o}"
         end
 
-        def exec_command(cmd)
+        def exec_vagrant_command(cmd)
           res = false
           # NOTE: destroy requires an additonal -f flag (interactive tty otherwise)
           if cmd.include?("destroy")
