@@ -17,10 +17,11 @@ Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path
 * Version (0.1.0) Current
 
   * Enable `vagrant ssh` interactive shell
+  * Filter only active/ inactive
+  * Changed formatting of target and command
 
 * Version (0.1.1)
 
-  * Filter only active/ inactive
   * Add option to switch to .config path `vgctl -t target-box -c cd`
 
 
@@ -88,7 +89,7 @@ Target or list vagrant config relative to a given config
 
 ```bash
 vgls my-test-box
-vgctl -t my-test-box
+vgctl my-test-box
 ```
 
 Refresh cache, by default cache is stored at `$HOME/.vagrant-tools/settings.json`
@@ -102,7 +103,7 @@ vgctl -x
 Run a vagrant command (-c prepends `vagrant ` to all commands)
 
 ```bash
-vgctl -t my-test-box -c list-commands
+vgctl my-test-box list-commands
 # runs `vagrant list-commands` in the path of `my-test-box`
 # ... etc
 ```
@@ -122,8 +123,8 @@ Listing all vagrant configs, and starting VM
 # list all configs
 vgls
 # execute `vagrant up` on path of `my-test-box`
-vgctl -t my-test-box -c up
-vgctl -t my-test-box -c ssh
+vgctl my-test-box up
+vgctl my-test-box ssh
 ```
 
 Destroy a running VM
@@ -132,6 +133,6 @@ Destroy a running VM
 # list running configs
 vgls -a
 # execute `vagrant destroy` on path of `my-test-box`
-vgctl -t my-test-box -c destory
+vgctl my-test-box destory
 ```
 
