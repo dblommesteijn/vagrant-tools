@@ -4,27 +4,16 @@ require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
 require 'getoptlong'
 
 
-def main(argv)
-  simple_argv = argv.reject{|t| t.start_with?("-")}
-
+def main()
+  # configure vgtools
   vgtools_cfg = Vagrant::Tools.config do |c|
+    # defaults
     c.prefix = ENV["HOME"]
     c.verbose = false
     c.output = {machine: false, long: false, only_active: false}
     c.target = nil
     c.cmd = nil
     c.refresh_cache = false
-
-    # parse commands without - prefix
-    simple_argv.each_with_index do |arg, i|
-      case i
-      when 0
-        c.target = arg
-      when 1
-        c.cmd = simple_argv[1..-1].join(" ")
-        break
-      end
-    end
     # parse regular commands with getopt
     begin
       opts = GetoptLong.new(
@@ -61,12 +50,24 @@ usage: vgctl [-pvxhc] [target command]
 
             EOF
           exit
+        else
+          puts "extra: " + opt + "|" + arg
         end
       end
     rescue GetoptLong::InvalidOption => e
       exit
     end
 
+    # parse commands and targets (outside getopt)
+    ARGV.each_with_index do |arg, i|
+      case i
+      when 0
+        c.target = arg
+      when 1
+        c.cmd = ARGV[1..-1].join(" ")
+        break
+      end
+    end
   end
 
   cfg = Vagrant::Tools.get_config 
@@ -78,12 +79,14 @@ usage: vgctl [-pvxhc] [target command]
   end
   unless verify
     puts vgtools_cfg.error_messages
-    exit 1
+    exit
   end
 
   # print verbose message
   if cfg.verbose
     puts "running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
+    puts "using options: "
+    puts vgtools_cfg.to_s
   end
   
   # find config root by target name (project root name)
@@ -99,10 +102,10 @@ usage: vgctl [-pvxhc] [target command]
   config.exec_vagrant_command(cfg.cmd)
 end
 
-
+# entry point
 if File.basename(__FILE__) == File.basename($0)
   begin
-    main(ARGV)
+    main()
   rescue Interrupt
     exit 0
   end

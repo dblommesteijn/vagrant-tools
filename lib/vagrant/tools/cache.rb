@@ -10,7 +10,7 @@ module Vagrant
         @path = path
         @cfg = Vagrant::Tools.get_config
         unless File.exists?(@path)
-          puts "Creating `#{path}`" if @cfg.verbose
+          puts "creating `#{path}`" if @cfg.verbose
           FileUtils.mkpath(@path)
         end
         @filename = "#{@path}/settings.json"
@@ -19,12 +19,11 @@ module Vagrant
 
       def get_config
         return {} unless File.exists?(@filename)
-        #TODO: read from file
         begin
-          puts "Reading cache file: `#{@filename}`" if @cfg.verbose
+          puts "reading cache file: `#{@filename}`" if @cfg.verbose
           json = JSON.parse(File.read(@filename), {symbolize_names: true})
           c_time = Time.at(json[:configs_date])
-          puts "Cache time: `#{c_time}`" if @cfg.verbose
+          puts "cache time: `#{c_time}`" if @cfg.verbose
           @delta = Cache.time_delta(c_time) #if json.include?(:configs_date)
           return json[:configs]
         rescue Exception => e
@@ -35,7 +34,7 @@ module Vagrant
       end
 
       def set_config(dirs)
-        puts "Writing to `#{@filename}`" if @cfg.verbose
+        puts "writing to `#{@filename}`" if @cfg.verbose
         config_paths = { configs_date: Time.now.to_i, configs: dirs.flat_map{|k,v| v.map(&:config_path)} }
         flat_json = JSON.pretty_generate(config_paths)
         puts flat_json if @cfg.verbose

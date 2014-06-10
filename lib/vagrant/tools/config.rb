@@ -29,7 +29,7 @@ module Vagrant
       end
 
       def error_messages
-        @errors.map{|k,v| "Error `#{k}`: #{v}"}
+        @errors.map{|k,v| "error `#{k}`: #{v}"}
       end
       
       def to_hash

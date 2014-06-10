@@ -23,14 +23,14 @@ module Vagrant
 
       def find_vagrant_configs
         unless @dirs.empty?
-          puts "Config already loaded (use -x to force reload)" if @cfg.verbose
+          puts "config already loaded (use -x to force reload)" if @cfg.verbose
           return @dirs
         end
         prefix = @cfg.prefix
         cache_configs = self.cache.get_config
         # break if config found (unless refreshing)
         if !cache_configs.empty? && !@cfg.refresh_cache
-          puts "Reading config from cache" if @cfg.verbose
+          puts "reading config from cache" if @cfg.verbose
           cache_configs.each do |config|
             # create new config instance
             self.add_config_dirs(config)
@@ -39,7 +39,7 @@ module Vagrant
         end
         # findin configs via find
         cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
-        puts "Finding vagrant configs: `#{cmd}`..." if @cfg.verbose
+        puts "finding vagrant configs: `#{cmd}`..." if @cfg.verbose
         Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
           stdout.read.split("\n").each do |config|
