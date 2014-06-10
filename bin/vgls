@@ -2,68 +2,95 @@
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
 require 'optparse'
+require 'getoptlong'
 
 
 def main(argv)
-  # set configuration
+  simple_argv = argv.reject{|t| t.start_with?("-")}
+
   vgtools_cfg = Vagrant::Tools.config do |c|
-    # defaults
     c.prefix = ENV["HOME"]
     c.verbose = false
-    # getopts
-    opt_parser = OptionParser.new do |opts|
-      opts.banner = "Vagrant list, Usage: vgls [options]"
-      opts.on("-p", "--prefix DIR", String, "Define prefix (default $HOME)") do |v|
-        c.prefix = v
-        c.refresh_cache = true
-      end
-      opts.on("-v", "--verbose", "Verbose output") do |v|
-        c.verbose = true
-      end
-      opts.on("-t", "--target TARGET", String, "Target specific config (Vagrantfile dir)") do |v|
-        c.target = v
-      end
-      opts.on("-x", "--refresh-cache", "Refresh cached results") do |v|
-        c.refresh_cache = v
-      end
-      opts.on("-a", "--only-active", "Show only active VMs") do |v|
-        c.output[:only_active] = v
-      end
-      opts.on_tail("-h", "--help", "Show this message") do
-        puts opts
-        exit 1
-      end
+    c.output = {machine: false, long: false, only_active: false}
+    c.target = nil
+    c.cmd = nil
+    c.refresh_cache = false
 
+    # parse commands without - prefix
+    simple_argv.each_with_index do |arg, i|
+      case i
+      when 0
+        c.target = arg
+      when 1
+        c.cmd = simple_argv[1..-1].join(" ")
+        break
+      end
     end
+
+    # parse regular commands with getopt
     begin
-      opt_parser.parse!
-    rescue OptionParser::InvalidOption => e
-      puts e.message
-      exit 1
-    rescue OptionParser::MissingArgument => e
-      puts e.message
-      exit 1
+      opts = GetoptLong.new(
+        ['--prefix', '-p', GetoptLong::REQUIRED_ARGUMENT],
+        ['--verbose', '-v', GetoptLong::NO_ARGUMENT],
+        ['--refresh-cache', '-x', GetoptLong::NO_ARGUMENT],
+        ['--only-active', '-a', GetoptLong::NO_ARGUMENT],
+        ['--help', '-h', GetoptLong::NO_ARGUMENT],
+      )
+      opts.each do |opt, arg|
+        case opt
+          when '--prefix'
+            c.prefix = arg
+            c.refresh_cache = true
+          when '--verbose'
+            c.verbose = true
+          when '--refresh-cache'
+            c.refresh_cache = true
+          when '--only-active'
+            c.output[:only_active] = true
+          when '--help'
+            puts <<-EOF
+vgls, version: #{Vagrant::Tools::VERSION}
+
+usage: vgls [-pvxh] [target]
+  
+  p : set lookup prefix (default $HOME)
+  v : verbose output
+  x : refresh cached results (.vagrant lookup)
+  target : target a specific config (vagrantfile dir)
+
+  h : show this help message
+
+            EOF
+          exit
+        end
+      end
+    rescue GetoptLong::InvalidOption => e
+      exit
     end
+
   end
 
+  # verify errors
   verify = vgtools_cfg.verify? do |errors|
-    # if
-    # errors[:]
+    # TODO: not sure if this should be here!?
   end
+  # act on errors
   unless verify
     puts vgtools_cfg.error_messages
-    exit 1
+    exit
   end
 
-  cfg = Vagrant::Tools.get_config 
+  cfg = Vagrant::Tools.get_config
   if cfg.verbose
-    puts "Running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
+    puts "running `#{File.basename(__FILE__)}` in verbose mode (disable by removing [-v])"
   end
 
-  # output lists
+  # build root object from found configs (internal)
   root = Vagrant::Tools::Root.new
+  # report requested output
   puts root.to_outputs
 
+  # report old cache
   if root.cache.cache_old? 
     a = root.cache.cache_time_a
     puts "Cache is %dd, %dh, %dm, and %ds old (consider refreshing -x)" % a
@@ -71,7 +98,6 @@ def main(argv)
     a = root.cache.cache_time_a
     puts "Cache is %dd, %dh, %dm, and %ds old" % a
   end
-
 end
 
 

@@ -31,6 +31,16 @@ module Vagrant
       def error_messages
         @errors.map{|k,v| "Error `#{k}`: #{v}"}
       end
+      
+      def to_hash
+        hash = {}
+        instance_variables.each {|var| hash[var.to_s.delete("@")] = instance_variable_get(var) }
+        hash
+      end
+
+      def to_s
+        self.to_hash.map{|k,v| "#{k}: #{v}"}.join("\n")
+      end
 
     end
 

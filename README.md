@@ -87,7 +87,7 @@ Target or list vagrant config relative to a given config
 *NOTE: duplicate config names will get a _n offset*
 
 ```bash
-vgls -t my-test-box
+vgls my-test-box
 vgctl -t my-test-box
 ```
 
@@ -129,8 +129,8 @@ vgctl -t my-test-box -c ssh
 Destroy a running VM
 
 ```bash
-# list all configs
-vgls
+# list running configs
+vgls -a
 # execute `vagrant destroy` on path of `my-test-box`
 vgctl -t my-test-box -c destory
 ```

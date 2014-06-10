@@ -42,7 +42,7 @@ module Vagrant
             if !self.active?
               ret << "vmid: #{self.id}" if !@cfg.output[:only_active]
             else
-              ret << "pid: #{p.pid}" if @cfg.output[:only_active]
+              ret << "pid: #{p.pid}"
             end
           else
             ret << "never started" if !@cfg.output[:only_active]
