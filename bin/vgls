@@ -93,16 +93,15 @@ usage: vgls [-pvxh] [target]
   end
   # build root object from found configs (internal)
   root = Vagrant::Tools::Root.new(cfg, output)
-
-  # filter nodes
-  # if cfg.output[:only_active]
-    
   nodes = []
-  root.visit() do |node|
-
-
-    # filter `only active`
-    if cfg.output[:only_active]
+  # filter no-nodes
+  if !cfg.output[:only_active] && cfg.target.nil?
+    root.visit() do |node|
+      nodes << node
+    end
+  # filter `only-active`
+  elsif cfg.output[:only_active] && cfg.target.nil?
+    root.visit() do |node|
       if node.is_a?(Vagrant::Tools::Orm::Config)
         nodes << node if node.has_active_machines?
       elsif node.is_a?(Vagrant::Tools::Orm::Machine)
@@ -110,8 +109,10 @@ usage: vgls [-pvxh] [target]
       elsif node.is_a?(Vagrant::Tools::Orm::Provider)
         nodes << node if node.active?
       end
-    # filter `target` present
-    elsif !cfg.target.nil?
+    end
+  # filter `target`
+  elsif !cfg.output[:only_active] && !cfg.target.nil?
+    root.visit() do |node|
       if node.is_a?(Vagrant::Tools::Orm::Config)
         nodes << node if node.match_target?(cfg.target)
       elsif node.is_a?(Vagrant::Tools::Orm::Machine)
@@ -119,12 +120,21 @@ usage: vgls [-pvxh] [target]
       elsif node.is_a?(Vagrant::Tools::Orm::Provider)
         nodes << node if node.parent.match_target?(cfg.target)
       end
-    else
-      nodes << node
+    end
+  # filter `target` and `only-active`
+  elsif cfg.output[:only_active] && !cfg.target.nil?
+    root.visit() do |node|
+      if node.is_a?(Vagrant::Tools::Orm::Config)
+        nodes << node if node.has_active_machines? && node.match_target?(cfg.target)
+      elsif node.is_a?(Vagrant::Tools::Orm::Machine)
+        nodes << node if node.has_active_providers? && node.parent.match_target?(cfg.target)
+      elsif node.is_a?(Vagrant::Tools::Orm::Provider)
+        nodes << node if node.active? && node.parent.match_target?(cfg.target)
+      end
     end
   end
 
-  # prepare output
+  # determine how the nodes are output
   nodes.each do |node|
     # show vagrantfile
     if cfg.output[:vagrantfile]
