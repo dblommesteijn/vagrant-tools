@@ -6,15 +6,19 @@ module Vagrant
 
       class Config
 
-        attr_accessor :name, :project_root, :offset, :config_path
+        attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent
 
-        def initialize(config_path)
+        def initialize(cfg, output, parent, config_path)
+          @cfg = cfg
+          @output = output
+          self.parent = parent
           self.config_path = config_path
-          @cfg = Vagrant::Tools.get_config
           self.project_root = File.absolute_path("#{config_path}/../")
-          @machines = Dir["#{self.config_path}/machines/*"].flat_map{|t| Machine.new(t)}
+          self.vagrantfile = File.absolute_path("#{self.project_root}/Vagrantfile")
+          @machines = Dir["#{self.config_path}/machines/*"].flat_map{|t| Machine.new(@cfg, @output, self, t)}
           self.name = File.basename(File.absolute_path("#{config_path}/../"))
           self.offset = 0
+          @output.append("found config: `#{self.config_path}`", :verbose)
         end
 
         def project_root_name
@@ -29,13 +33,30 @@ module Vagrant
         def exec_vagrant_command(cmd)
           # TODO: add some cmd check?
           cmd = "(cd #{self.project_root} && vagrant #{cmd})"
-          puts cmd if @cfg.verbose
+          @output.append(cmd, :verbose)
           # system call to command
           system(cmd)
         end
 
         def names
           @machines.map(&:name)
+        end
+
+        def vagrantfile_contents
+          return nil unless File.exists?(self.vagrantfile)
+          File.read(self.vagrantfile)
+        end
+
+        def has_active_machines?
+          @machines.map(&:has_active_providers?).include?(true)
+        end
+
+        def match_target?(target)
+          self.project_root_name_with_offset == target
+        end
+
+        def pretty_name
+          "#{self.project_root_name_with_offset} (#{@project_root})"
         end
 
         def to_outputs
@@ -48,6 +69,15 @@ module Vagrant
             end
           end
         end
+
+        def visit(&block)
+          block.call(self)
+          @machines.each do |machine|
+            machine.visit(&block)
+          end
+        end
+
+        protected
 
       end
 

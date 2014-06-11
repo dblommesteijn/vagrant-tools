@@ -6,11 +6,13 @@ module Vagrant
 
       class Provider
 
-        attr_accessor :id
+        attr_accessor :id, :parent
 
-        def initialize(provider_path)
+        def initialize(cfg, output, parent, provider_path)
+          @cfg = cfg
+          @output = output
+          self.parent = parent
           @provider_path = provider_path
-          @cfg = Vagrant::Tools.get_config
           @id_file = "#{@provider_path}/id"
           self.id = File.read(@id_file) if self.valid?
           @process = nil
@@ -24,6 +26,7 @@ module Vagrant
         def active?
           !@process.nil?
         end
+        # alias_method :has_active?, :active?
 
         def process
           return @process if !@process.nil? || self.id.nil?
@@ -33,19 +36,23 @@ module Vagrant
           @process
         end
 
-        def to_outputs
+        def status_s
           ret = []
           if self.valid?
             p = self.process
             if !self.active?
-              ret << "vmid: #{self.id}" if !@cfg.output[:only_active]
+              ret << "vmid: #{self.id}"
             else
               ret << "pid: #{p.pid}"
             end
           else
-            ret << "never started" if !@cfg.output[:only_active]
+            ret << "never started"
           end
           ret.join
+        end
+
+        def visit(&block)
+          block.call(self)
         end
 
       end

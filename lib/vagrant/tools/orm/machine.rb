@@ -4,13 +4,15 @@ module Vagrant
 
       class Machine
 
-        attr_accessor :name
+        attr_accessor :name, :parent
 
-        def initialize(machine_path)
+        def initialize(cfg, output, parent, machine_path)
+          @cfg = cfg
+          @output = output
+          self.parent = parent
           @machine_path = machine_path
-          @cfg = Vagrant::Tools.get_config
           self.name = File.basename(machine_path)
-          @provider = Dir["#{@machine_path}/*"].flat_map{|t| Provider.new(t)}
+          @provider = Dir["#{@machine_path}/*"].flat_map{|t| Provider.new(@cfg, @output, parent, t)}
         end
 
         def ids
@@ -21,17 +23,14 @@ module Vagrant
           @provider.map(&:process)
         end
 
-        def to_outputs
-          provider = @provider.map(&:to_outputs).join("")
-          if !@cfg.output[:only_active]
-            if provider.empty?
-              return "- #{self.name} (no provider found)\n"
-            end
-            "- #{self.name} (#{provider})\n"
-          else
-            if !provider.empty?
-              "- #{self.name} (#{provider})\n"
-            end
+        def has_active_providers?
+          @provider.map(&:active?).include?(true)
+        end
+
+        def visit(&block)
+          block.call(self)
+          @provider.each do |provider|
+            provider.visit(&block)
           end
         end
 

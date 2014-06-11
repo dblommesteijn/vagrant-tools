@@ -7,11 +7,6 @@ module Vagrant
 
       def initialize
         @errors = {}
-        self.prefix = ENV["HOME"]
-        self.verbose = false
-        self.output = {machine: false, long: false, only_active: false}
-        self.target = nil
-        self.cmd = nil
       end
 
       def verify?(&block)
@@ -41,6 +36,7 @@ module Vagrant
       def to_s
         self.to_hash.map{|k,v| "#{k}: #{v}"}.join("\n")
       end
+
 
     end
 
