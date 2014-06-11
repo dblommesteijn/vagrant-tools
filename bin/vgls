@@ -73,8 +73,6 @@ usage: vgls [-pvxh] [target]
     end
   end
 
-
-
   # configuration
   cfg = Vagrant::Tools.get_config
   # output buffer

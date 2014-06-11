@@ -24,6 +24,10 @@ module Vagrant
           @buffer << [node.pretty_name, options]
         elsif node.is_a?(String)
           @buffer << [node, options]
+        elsif node.is_a?(Array)
+          node.each do |n|
+            @buffer << [n, options]
+          end
         end
       end
 

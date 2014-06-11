@@ -32,8 +32,6 @@ def main()
             c.verbose = true
           when '--refresh-cache'
             c.refresh_cache = true
-          when '--only-active'
-            c.output[:only_active] = true
           when '--help'
             puts <<-EOF
 vgctl, version: #{Vagrant::Tools::VERSION}
@@ -69,37 +67,46 @@ usage: vgctl [-pvxhc] [target command]
       end
     end
   end
+  # configuration
+  cfg = Vagrant::Tools.get_config
+  # output buffer
+  output = Vagrant::Tools::Output.new(cfg)
+  output.append("running `#{File.basename(__FILE__)}` in verbose mode (disable by removing [-v])", :verbose)
+  output.append(cfg.to_s, :verbose)
 
   cfg = Vagrant::Tools.get_config 
   verify = vgtools_cfg.verify? do |errors|
-    # if cfg.target.nil? || cfg.target == "
-    errors[:target] = "target does not exist" if cfg.target.nil?
+    errors[:target] = "does not exist" if cfg.target.nil? || cfg.target == ""
     errors[:cmd] = "invalid" if cfg.cmd.nil? || cfg.cmd == ""
-    # errors[:]
   end
   unless verify
-    puts vgtools_cfg.error_messages
+    output.append(vgtools_cfg.error_messages)
+    output.render()
     exit
   end
 
-  # print verbose message
-  if cfg.verbose
-    puts "running `#{File.basename(__FILE__)}` in verbose mode (disable by removing -v [options])"
-    puts "using options: "
-    puts vgtools_cfg.to_s
+  # build root object from found configs (internal)
+  root = Vagrant::Tools::Root.new(cfg, output)
+  nodes = []
+
+  # visit configs
+  root.visit() do |node|
+    if node.is_a?(Vagrant::Tools::Orm::Config)
+      nodes << node if node.match_target?(cfg.target)
+    end
   end
-  
-  # find config root by target name (project root name)
-  root = Vagrant::Tools::Root.new
-  config = root.find_by_project_root(cfg.target)
-  if config.nil?
-    puts "target config not found"
+
+  # verify config target, and run on one specific config
+  if nodes.empty?
+    output.append("target config not found")
+    exit
+  elsif nodes.size > 1
+    output.append("multiple configs found (this should never happen)")
     exit
   else
-    puts "executing: #{cfg.cmd}" if cfg.verbose
+    output.append("executing: #{cfg.cmd}", :verbose)
+    nodes.first.exec_vagrant_command(cfg.cmd)
   end
-  # execute command relative to config
-  config.exec_vagrant_command(cfg.cmd)
 end
 
 # entry point
