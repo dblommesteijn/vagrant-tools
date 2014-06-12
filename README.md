@@ -112,7 +112,14 @@ vgctl my-test-box list-commands
 # ... etc
 ```
 
-Print help file
+Launch a shell targeted at the 'cwd' relative to the target
+
+```bash
+vgctl my-text-box shell
+# launches a shell: pwd => $HOME/path/to/your/repos/my-text-box
+```
+
+Print help message
 
 ```bash
 vgls -h
