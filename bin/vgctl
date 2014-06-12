@@ -36,16 +36,16 @@ def main()
             puts <<-EOF
 vgctl, version: #{Vagrant::Tools::VERSION}
 
-usage: vgctl [-pvxhc] [target command]
+usage: vgctl [-pvxhc] [TARGET [COMMAND | shell]]
   
   p : set lookup prefix (default $HOME)
   v : verbose output
   x : refresh cached results (.vagrant lookup)
-  target : target a specific config (vagrantfile dir)
-  command : run vagrant command relative to target
+  TARGET : target a specific config (vagrantfile dir)
+  COMMAND : run vagrant command at target's `cwd`
+  shell : start a shell at target's `cwd`
 
   h : show this help message
-
             EOF
           exit
         else
@@ -96,17 +96,22 @@ usage: vgctl [-pvxhc] [target command]
     end
   end
 
-  # verify config target, and run on one specific config
-  if nodes.empty?
-    output.append("target config not found")
-    exit
-  elsif nodes.size > 1
-    output.append("multiple configs found (this should never happen)")
-    exit
-  else
-    output.append("executing: #{cfg.cmd}", :verbose)
-    nodes.first.exec_vagrant_command(cfg.cmd)
+  begin
+    # verify config target, and run on one specific config
+    if nodes.empty?
+      output.append("target config not found")
+      exit
+    elsif nodes.size > 1
+      output.append("multiple configs found (this should never happen)")
+      exit
+    else
+      output.append("executing: #{cfg.cmd}", :verbose)
+      nodes.first.exec_vagrant_command(cfg.cmd)
+    end
+  rescue Exception => e
+    output.append(e.message)
   end
+  output.render()
 end
 
 # entry point

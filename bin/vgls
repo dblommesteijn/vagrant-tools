@@ -42,17 +42,16 @@ def main()
             puts <<-EOF
 vgls, version: #{Vagrant::Tools::VERSION}
 
-usage: vgls [-pvxh] [target]
+usage: vgls [-pvxh] [TARGET]
   
   p : set lookup prefix (default $HOME)
   v : verbose output
   x : refresh cached results (.vagrant lookup)
   V : output Vagrantfile
   a : filter on running instances
-  target : target a specific config (Vagrantfile dir)
+  TARGET : target a specific config (Vagrantfile dir)
 
   h : show this help message
-
             EOF
           exit
         end

@@ -6,6 +6,8 @@ module Vagrant
 
       class Config
 
+        ENV_SHELL = ENV["SHELL"]
+
         attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent
 
         def initialize(cfg, output, parent, config_path)
@@ -30,9 +32,16 @@ module Vagrant
           "#{self.project_root_name}#{o}"
         end
 
-        def exec_vagrant_command(cmd)
+        def exec_vagrant_command(command)
           # TODO: add some cmd check?
-          cmd = "(cd #{self.project_root} && vagrant #{cmd})"
+          cmd = ""
+          case command
+          when 'shell'
+            raise "no shell found (in $SHELL)" if ENV_SHELL.nil? || ENV_SHELL == ""
+            cmd = "(cd #{self.project_root} && #{ENV_SHELL})"
+          else
+            cmd = "(cd #{self.project_root} && vagrant #{cmd})"
+          end
           @output.append(cmd, :verbose)
           # system call to command
           system(cmd)
