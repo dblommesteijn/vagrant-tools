@@ -40,7 +40,7 @@ module Vagrant
             raise "no shell found (in $SHELL)" if ENV_SHELL.nil? || ENV_SHELL == ""
             cmd = "(cd #{self.project_root} && #{ENV_SHELL})"
           else
-            cmd = "(cd #{self.project_root} && vagrant #{cmd})"
+            cmd = "(cd #{self.project_root} && vagrant #{command})"
           end
           @output.append(cmd, :verbose)
           # system call to command
