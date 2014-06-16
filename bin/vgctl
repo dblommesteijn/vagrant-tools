@@ -99,8 +99,8 @@ usage: vgctl [-pvxhc] [TARGET [COMMAND | shell]]
   begin
     # verify config target, and run on one specific config
     if nodes.empty?
-      output.append("target config not found")
-      exit
+      output.append("target config not found: `#{cfg.target}`")
+      exit 1
     elsif nodes.size > 1
       output.append("multiple configs found (this should never happen)")
       exit
