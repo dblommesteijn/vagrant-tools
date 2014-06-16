@@ -3,7 +3,7 @@
 Vagrant configuration management tool (via cli).
 
 By using cli commands: `vgls` you can list all .vagrant configs on your system.
-Use `vgctl -t config -c (vagrant command)` to run vagrant commands from any path (working dir) on your system.
+Use `vgctl repo-name up/halt/destroy/ssh your-config` to run vagrant commands from any path (working dir) on your system.
 
 
 ## Roadmap
