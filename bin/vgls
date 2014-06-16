@@ -10,7 +10,7 @@ def main()
     # defaults
     c.prefix = ENV["HOME"]
     c.verbose = false
-    c.output = {machine: false, long: false, only_active: false, vagrantfile: false}
+    c.output = {machine: false, long: false, only_active: false, vagrantfile: false, zombies: false}
     c.target = nil
     c.cmd = nil
     c.refresh_cache = false
@@ -22,6 +22,7 @@ def main()
         ['--verbose', '-v', GetoptLong::NO_ARGUMENT],
         ['--refresh-cache', '-x', GetoptLong::NO_ARGUMENT],
         ['--only-active', '-a', GetoptLong::NO_ARGUMENT],
+        ['--zombies', '-z', GetoptLong::NO_ARGUMENT],
         ['--vagrantfile', '-V', GetoptLong::NO_ARGUMENT],
         ['--help', '-h', GetoptLong::NO_ARGUMENT],
       )
@@ -38,6 +39,8 @@ def main()
             c.output[:only_active] = true
           when '--vagrantfile'
             c.output[:vagrantfile] = true
+          when '--zombies'
+            c.output[:zombies] = true
           when '--help'
             puts <<-EOF
 vgls, version: #{Vagrant::Tools::VERSION}
@@ -49,6 +52,7 @@ usage: vgls [-pvxh] [TARGET]
   x : refresh cached results (.vagrant lookup)
   V : output Vagrantfile
   a : filter on running instances
+  z : filter on zombie instances (no .config and running)
   TARGET : target a specific config (Vagrantfile dir)
 
   h : show this help message
@@ -82,51 +86,80 @@ usage: vgls [-pvxh] [TARGET]
   # verify errors
   verify = vgtools_cfg.verify? do |errors|
     # TODO: not sure if this should be here!?
+    if cfg.output[:only_active] && cfg.output[:zombies]
+      errors[:zombies] = "cannot lookup both only-active and zombies"
+    end
   end
   # act on errors
   unless verify
     puts vgtools_cfg.error_messages
-    exit
+    exit 1
   end
   # build root object from found configs (internal)
   root = Vagrant::Tools::Root.new(cfg, output)
   nodes = []
-  # filter no-nodes
-  if !cfg.output[:only_active] && cfg.target.nil?
-    root.visit() do |node|
-      nodes << node
-    end
-  # filter `only-active`
-  elsif cfg.output[:only_active] && cfg.target.nil?
-    root.visit() do |node|
-      if node.is_a?(Vagrant::Tools::Orm::Config)
-        nodes << node if node.has_active_machines?
-      elsif node.is_a?(Vagrant::Tools::Orm::Machine)
-        nodes << node if node.has_active_providers?
-      elsif node.is_a?(Vagrant::Tools::Orm::Provider)
-        nodes << node if node.active?
+
+  if !cfg.output[:zombies]
+    # filter no-nodes
+    if !cfg.output[:only_active] && cfg.target.nil?
+      root.visit() do |node|
+        nodes << node
+      end
+    # filter `only-active`
+    elsif cfg.output[:only_active] && cfg.target.nil?
+      root.visit() do |node|
+        if node.is_a?(Vagrant::Tools::Orm::Config)
+          nodes << node if node.has_active_machines?
+        elsif node.is_a?(Vagrant::Tools::Orm::Machine)
+          nodes << node if node.has_active_providers?
+        elsif node.is_a?(Vagrant::Tools::Orm::Provider)
+          nodes << node if node.active?
+        end
+      end
+    # filter `target`
+    elsif !cfg.output[:only_active] && !cfg.target.nil?
+      root.visit() do |node|
+        if node.is_a?(Vagrant::Tools::Orm::Config)
+          nodes << node if node.match_target?(cfg.target)
+        elsif node.is_a?(Vagrant::Tools::Orm::Machine)
+          nodes << node if node.parent.match_target?(cfg.target)
+        elsif node.is_a?(Vagrant::Tools::Orm::Provider)
+          nodes << node if node.parent.match_target?(cfg.target)
+        end
+      end
+    # filter `target` and `only-active`
+    elsif cfg.output[:only_active] && !cfg.target.nil?
+      root.visit() do |node|
+        if node.is_a?(Vagrant::Tools::Orm::Config)
+          nodes << node if node.has_active_machines? && node.match_target?(cfg.target)
+        elsif node.is_a?(Vagrant::Tools::Orm::Machine)
+          nodes << node if node.has_active_providers? && node.parent.match_target?(cfg.target)
+        elsif node.is_a?(Vagrant::Tools::Orm::Provider)
+          nodes << node if node.active? && node.parent.match_target?(cfg.target)
+        end
       end
     end
-  # filter `target`
-  elsif !cfg.output[:only_active] && !cfg.target.nil?
+  # filter `zombies` detached VMs
+  else
+    running_vms = Vagrant::Tools::Helper.get_running_vms
+
+
     root.visit() do |node|
-      if node.is_a?(Vagrant::Tools::Orm::Config)
-        nodes << node if node.match_target?(cfg.target)
-      elsif node.is_a?(Vagrant::Tools::Orm::Machine)
-        nodes << node if node.parent.match_target?(cfg.target)
-      elsif node.is_a?(Vagrant::Tools::Orm::Provider)
-        nodes << node if node.parent.match_target?(cfg.target)
+      if node.is_a?(Vagrant::Tools::Orm::Provider)
+        if !node.process.nil?
+          running_vms.delete(node.process.pid)
+        end
       end
     end
-  # filter `target` and `only-active`
-  elsif cfg.output[:only_active] && !cfg.target.nil?
-    root.visit() do |node|
-      if node.is_a?(Vagrant::Tools::Orm::Config)
-        nodes << node if node.has_active_machines? && node.match_target?(cfg.target)
-      elsif node.is_a?(Vagrant::Tools::Orm::Machine)
-        nodes << node if node.has_active_providers? && node.parent.match_target?(cfg.target)
-      elsif node.is_a?(Vagrant::Tools::Orm::Provider)
-        nodes << node if node.active? && node.parent.match_target?(cfg.target)
+    if running_vms.size > 0
+      output.append("Some pids still running:")
+      running_vms.each do |pid, vm|
+        output.append(vm)
+        #TODO: finish this!!!
+
+        #         elsif node.is_a?(Struct::ProcTableStruct)
+        #   @buffer << [node.cmdline, options]
+        # end
       end
     end
   end

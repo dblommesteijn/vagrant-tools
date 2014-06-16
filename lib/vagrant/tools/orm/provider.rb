@@ -30,7 +30,7 @@ module Vagrant
 
         def process
           return @process if !@process.nil? || self.id.nil?
-          Sys::ProcTable.ps do |p|
+          Helper.iterate_processes do |p|
             @process = p if p.cmdline.include?(self.id)
           end
           @process
