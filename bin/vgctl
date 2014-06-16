@@ -76,8 +76,8 @@ usage: vgctl [-pvxhc] [TARGET [COMMAND | shell]]
 
   cfg = Vagrant::Tools.get_config 
   verify = vgtools_cfg.verify? do |errors|
-    errors[:target] = "does not exist" if cfg.target.nil? || cfg.target == ""
-    errors[:cmd] = "invalid" if cfg.cmd.nil? || cfg.cmd == ""
+    errors[:target] = "missing target option (print help -h)" if cfg.target.nil? || cfg.target == ""
+    errors[:cmd] = "missing command option (print help -h)" if cfg.cmd.nil? || cfg.cmd == ""
   end
   unless verify
     output.append(vgtools_cfg.error_messages)
@@ -100,10 +100,8 @@ usage: vgctl [-pvxhc] [TARGET [COMMAND | shell]]
     # verify config target, and run on one specific config
     if nodes.empty?
       output.append("target config not found: `#{cfg.target}`")
-      exit 1
     elsif nodes.size > 1
       output.append("multiple configs found (this should never happen)")
-      exit
     else
       output.append("executing: #{cfg.cmd}", :verbose)
       nodes.first.exec_vagrant_command(cfg.cmd)
