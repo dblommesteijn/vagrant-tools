@@ -18,15 +18,12 @@ Use `vgctl repo-name up/halt/destroy/ssh your-config` to run vagrant commands fr
 
   * Enable `vagrant ssh` interactive shell
 
-* Version (0.1.1) Current
+* Current/ Master
 
-  * Filter only active/ inactive
+  * Filter show only active
   * Changed formatting of target and command
   * Add option to switch to .config path `vgctl target-box shell`
-
-* Future
-
-  * stub
+  * Filter show only zombies
 
 
 ## Installation
@@ -110,6 +107,18 @@ Run a vagrant command (-c prepends `vagrant ` to all commands)
 vgctl my-test-box list-commands
 # runs `vagrant list-commands` in the path of `my-test-box`
 # ... etc
+```
+
+Show only active instances
+
+```bash
+vgls -a
+```
+
+Show detached instances (running without .config)
+
+```bash
+vgls -z
 ```
 
 Launch a shell targeted at the 'cwd' relative to the target
