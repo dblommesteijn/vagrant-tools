@@ -142,8 +142,6 @@ usage: vgls [-pvxh] [TARGET]
   # filter `zombies` detached VMs
   else
     running_vms = Vagrant::Tools::Helper.get_running_vms
-
-
     root.visit() do |node|
       if node.is_a?(Vagrant::Tools::Orm::Provider)
         if !node.process.nil?
@@ -152,14 +150,8 @@ usage: vgls [-pvxh] [TARGET]
       end
     end
     if running_vms.size > 0
-      output.append("Some pids still running:")
       running_vms.each do |pid, vm|
-        output.append(vm)
-        #TODO: finish this!!!
-
-        #         elsif node.is_a?(Struct::ProcTableStruct)
-        #   @buffer << [node.cmdline, options]
-        # end
+        output.append("#{vm.pid}, #{vm.cmdline}")
       end
     end
   end
