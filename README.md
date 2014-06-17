@@ -1,6 +1,6 @@
 # Vagrant::Tools
 
-Vagrant cli configuration management tool. The missing tool for vagrant that allows you to control all your vagrant instances. Use cli command: `vgls` to list all vagrant configs (all Vagrantfiles), and `vgctl target vgcmd` to control them from outside of the cwd.
+Vagrant cli configuration management tool. The missing tool for vagrant that allows you to control all your vagrant instances. Use cli command: `vgls` to list all vagrant configs (all Vagrantfiles), and `vgctl [target] [vgcmd]` to control configurations from outside the Vagrantfile dir.
 
 **Example**
 
@@ -9,9 +9,21 @@ $ vgls
 some-project (/Users/dblommesteijn/Programming/some-project)
 - testing (vmid: cee72fc1-f647-4a2a-be48-04b4c1adeb2d)
 - deployment (vmid: d46784f8-5a76-49eb-a511-1ab6c50d777d)
+$ vgctl some-project status
+Current machine states:
+
+testing                   poweroff (virtualbox)
+deployment                poweroff (virtualbox)
+
+This environment represents multiple VMs. The VMs are all listed
+above with their current state. For more information about a specific
+VM, run `vagrant status NAME`.
 $ vgctl some-project up testing
+... starting the vm
 $ vgctl some-project ssh testing
+... interactive ssh shell
 $ vgctl some-project destroy testing
+... destroying vm [y/N]
 ```
 
 ## Roadmap
@@ -26,12 +38,16 @@ $ vgctl some-project destroy testing
 
   * Enable `vagrant ssh` interactive shell
 
-* Current/ Master
+* Version (0.1.1)
 
   * Filter show only active
   * Changed formatting of target and command
   * Add option to switch to .config path `vgctl target-box shell`
   * Filter show only zombies
+
+* Current/ Master
+
+  * stub
 
 
 ## Installation
