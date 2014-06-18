@@ -17,7 +17,16 @@ module Vagrant
           self.config_path = config_path
           self.project_root = File.absolute_path("#{config_path}/../")
           self.vagrantfile = File.absolute_path("#{self.project_root}/Vagrantfile")
-          @machines = Dir["#{self.config_path}/machines/*"].flat_map{|t| Machine.new(@cfg, @output, self, t)}
+          machine_paths = self.get_machine_paths()
+          @output.append("machine dirs found: #{machine_paths.size}", :verbose)
+          # lookup if machines path is created (else run vagrant status)
+          if machine_paths.empty?
+            @output.append("reloading machine paths `vagrant status`", :verbose)
+            # create machines path
+            self.exec_vagrant_command("status", :silent)
+            machine_paths = self.get_machine_paths()
+          end
+          @machines = machine_paths.flat_map{|t| Machine.new(@cfg, @output, self, t)}
           self.name = File.basename(File.absolute_path("#{config_path}/../"))
           self.offset = 0
           @output.append("found config: `#{self.config_path}`", :verbose)
@@ -32,7 +41,9 @@ module Vagrant
           "#{self.project_root_name}#{o}"
         end
 
-        def exec_vagrant_command(command)
+        def exec_vagrant_command(command, options=[])
+          options = [options] unless options.is_a?(Array)
+          silent = options.include?(:silent) ? " > /dev/null" : ""
           # TODO: add some cmd check?
           cmd = ""
           case command
@@ -40,7 +51,7 @@ module Vagrant
             raise "no shell found (in $SHELL)" if ENV_SHELL.nil? || ENV_SHELL == ""
             cmd = "(cd #{self.project_root} && #{ENV_SHELL})"
           else
-            cmd = "(cd #{self.project_root} && vagrant #{command})"
+            cmd = "(cd #{self.project_root} && vagrant #{command}#{silent})"
           end
           @output.append(cmd, :verbose)
           # system call to command
@@ -87,6 +98,10 @@ module Vagrant
         end
 
         protected
+
+        def get_machine_paths()
+          Dir["#{self.config_path}/machines/*"]
+        end
 
       end
 
