@@ -8,19 +8,21 @@ module Vagrant
 
         ENV_SHELL = ENV["SHELL"]
 
-        attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent
+        attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent, :hidden
 
         def initialize(cfg, output, parent, config_path)
           @cfg = cfg
           @output = output
           self.parent = parent
           self.config_path = config_path
+          self.hidden = self.hidden_path?(config_path)
           self.project_root = File.absolute_path("#{config_path}/../")
           self.vagrantfile = File.absolute_path("#{self.project_root}/Vagrantfile")
           machine_paths = self.get_machine_paths()
           @output.append("machine dirs found: #{machine_paths.size}", :verbose)
           # lookup if machines path is created (else run vagrant status)
-          if machine_paths.empty?
+          machine_paths = []
+          if !self.hidden && machine_paths.empty?
             @output.append("reloading machine paths `vagrant status`", :verbose)
             # create machines path
             self.exec_vagrant_command("status", :silent)
@@ -77,6 +79,12 @@ module Vagrant
 
         def pretty_name
           "#{self.project_root_name_with_offset} (#{@project_root})"
+        end
+
+        def hidden_path?(config_path)
+          @output.append("check hidden path? `#{config_path}`", :verbose)
+          @output.flush()
+          !config_path.match(/\/\.[\w]+/).nil?
         end
 
         def to_outputs

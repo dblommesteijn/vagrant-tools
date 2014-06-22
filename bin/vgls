@@ -46,7 +46,7 @@ def main()
 vgls, version: #{Vagrant::Tools::VERSION}
 
 usage: vgls [-pvxh] [TARGET]
-  
+
   p : set lookup prefix (default $HOME)
   v : verbose output
   x : refresh cached results (.vagrant lookup)
@@ -165,10 +165,10 @@ usage: vgls [-pvxh] [TARGET]
         output.append("-- Vagrantfile (#{node.vagrantfile}): ---------------------")
         output.append(node.vagrantfile_contents)
       end
-    else 
+    else
       # print all nodes
       if node.is_a?(Vagrant::Tools::Orm::Config)
-        output.append(node)
+        output.append(node) if !node.hidden
       elsif node.is_a?(Vagrant::Tools::Orm::Machine)
         output.append("- #{node.name} ", :nonewline)
       elsif node.is_a?(Vagrant::Tools::Orm::Provider)
