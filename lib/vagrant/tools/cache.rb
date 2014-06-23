@@ -3,14 +3,17 @@ module Vagrant
 
     class Cache
 
+      CACHE_VERSION = "#{Vagrant::Tools::VERSION}a"
+
       # attr_accessor :prefix, :verbose, :output, :options, :target, :cmd
       PATH = "#{ENV["HOME"]}/.vagrant-tools"
 
-      def initialize(path = PATH)
+      def initialize(output, path = PATH)
+        @output = output
         @path = path
         @cfg = Vagrant::Tools.get_config
         unless File.exists?(@path)
-          puts "creating `#{path}`" if @cfg.verbose
+          @output.append("creating `#{path}`", :verbose)
           FileUtils.mkpath(@path)
         end
         @filename = "#{@path}/settings.json"
@@ -20,24 +23,33 @@ module Vagrant
       def get_config
         return {} unless File.exists?(@filename)
         begin
-          puts "reading cache file: `#{@filename}`" if @cfg.verbose
+          @output.append("reading cache file: `#{@filename}`", :verbose)
           json = JSON.parse(File.read(@filename), {symbolize_names: true})
+          if json.include?(:version)
+            raise "old config version" if json[:version] != CACHE_VERSION
+          else
+            raise "old config version"
+          end
           c_time = Time.at(json[:configs_date])
-          puts "cache time: `#{c_time}`" if @cfg.verbose
+          @output.append("cache time: `#{c_time}`", :verbose)
           @delta = Cache.time_delta(c_time) #if json.include?(:configs_date)
           return json[:configs]
         rescue Exception => e
-          puts e.message
-          puts e
+          @output.append(e.message)
+          @output.append(e)
+          @output.flush()
           return {}
         end
       end
 
       def set_config(dirs)
-        puts "writing to `#{@filename}`" if @cfg.verbose
-        config_paths = { configs_date: Time.now.to_i, configs: dirs.flat_map{|k,v| v.map(&:config_path)} }
+        @output.append("writing to `#{@filename}`", :verbose)
+        config_paths = {}
+        config_paths[:version] = CACHE_VERSION
+        config_paths[:configs_date] = Time.now.to_i
+        config_paths[:configs] = dirs.flat_map{|k,v| v.map(&:config_path)}
         flat_json = JSON.pretty_generate(config_paths)
-        puts flat_json if @cfg.verbose
+        @output.append(flat_json, :verbose)
         File.open(@filename,"w") do |f|
           f.write(flat_json)
         end
@@ -48,8 +60,8 @@ module Vagrant
       end
 
       def cache_time_a
-        mm, ss = @delta.divmod(60) 
-        hh, mm = mm.divmod(60) 
+        mm, ss = @delta.divmod(60)
+        hh, mm = mm.divmod(60)
         dd, hh = hh.divmod(24)
         [dd, hh, mm, ss]
       end

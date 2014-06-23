@@ -31,6 +31,11 @@ module Vagrant
         end
       end
 
+      def flush()
+        self.render()
+        @buffer = []
+      end
+
     end
   end
 end

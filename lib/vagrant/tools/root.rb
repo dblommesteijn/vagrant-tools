@@ -8,19 +8,15 @@ module Vagrant
 
       attr_accessor :cache
 
-      LOOKUP_DIR = ".vagrant"
+      LOOKUP_DIR = "Vagrantfile"
 
       def initialize(cfg, output)
         @cfg = cfg
         @output = output
         @dirs = {}
-        self.cache = Cache.new
+        self.cache = Cache.new(@output)
         self.find_vagrant_configs
       end
-
-      # def find_by_project_root(project_root_name)
-      #   self.get_config_without_offset(project_root_name)
-      # end
 
       def find_vagrant_configs
         unless @dirs.empty?
@@ -36,11 +32,12 @@ module Vagrant
             # create new config instance
             self.add_config_dirs(config)
           end
-          return self 
+          return self
         end
         # findin configs via find
-        cmd = "find \"#{prefix}\" -type d -name \"#{LOOKUP_DIR}\""
+        cmd = "find \"#{prefix}\" -type f -name \"#{LOOKUP_DIR}\""
         @output.append("finding vagrant configs: `#{cmd}`...", :verbose)
+        @output.flush()
         Open3.popen3(cmd) do |stdin, stdout, stderr|
           stdin.close_write
           stdout.read.split("\n").each do |config_file|
@@ -52,29 +49,6 @@ module Vagrant
         self.cache.set_config(@dirs)
         self
       end
-
-      # def to_outputs
-      #   ret = []
-      #   if @cfg.target.nil?
-      #     # print all
-      #     ret << @dirs.flat_map{|k,t| t.map(&:to_outputs)}
-      #   else
-      #     ret << self.get_config_without_offset(@cfg.target).to_outputs      
-      #   end
-      #   ret.join
-      # end
-
-    #     if @cfg.target.nil?
-    #       configs = @dirs.flat_map{|k,t| t}
-    #     else
-    #       configs = [self.get_config_without_offset(@cfg.target)]
-    #     end
-
-    #         # filter `target`
-    # elsif !cfg.target.nil?
-    #   if node.is_a?(Vagrant::Tools::Orm::Root)
-    #     nodes << node
-    #   end
 
       def visit(&block)
         configs = @dirs.flat_map{|k,t| t}
@@ -95,8 +69,6 @@ module Vagrant
       def match_target?(target)
         false
       end
-
-
 
       protected
 

@@ -8,19 +8,20 @@ module Vagrant
 
         ENV_SHELL = ENV["SHELL"]
 
-        attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent
+        attr_accessor :name, :project_root, :offset, :config_path, :vagrantfile, :parent, :hidden
 
         def initialize(cfg, output, parent, config_path)
           @cfg = cfg
           @output = output
           self.parent = parent
           self.config_path = config_path
+          self.hidden = self.hidden_path?(config_path)
           self.project_root = File.absolute_path("#{config_path}/../")
           self.vagrantfile = File.absolute_path("#{self.project_root}/Vagrantfile")
           machine_paths = self.get_machine_paths()
           @output.append("machine dirs found: #{machine_paths.size}", :verbose)
           # lookup if machines path is created (else run vagrant status)
-          if machine_paths.empty?
+          if !self.hidden && @cfg.refresh_cache
             @output.append("reloading machine paths `vagrant status`", :verbose)
             # create machines path
             self.exec_vagrant_command("status", :silent)
@@ -79,6 +80,12 @@ module Vagrant
           "#{self.project_root_name_with_offset} (#{@project_root})"
         end
 
+        def hidden_path?(config_path)
+          @output.append("check hidden path? `#{config_path}`", :verbose)
+          @output.flush()
+          !config_path.match(/\/\.[\w]+/).nil?
+        end
+
         def to_outputs
           machines = @machines.map(&:to_outputs).join("")
           if !@cfg.output[:only_active]
@@ -100,7 +107,9 @@ module Vagrant
         protected
 
         def get_machine_paths()
-          Dir["#{self.config_path}/machines/*"]
+          target = "#{self.project_root}/.vagrant/machines"
+          return [] if !File.exists?(target)
+          Dir["#{target}/*"]
         end
 
       end
