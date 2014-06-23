@@ -22,7 +22,7 @@ module Vagrant
           @output.append("machine dirs found: #{machine_paths.size}", :verbose)
           # lookup if machines path is created (else run vagrant status)
           machine_paths = []
-          if !self.hidden && machine_paths.empty?
+          if !self.hidden && @cfg.refresh_cache
             @output.append("reloading machine paths `vagrant status`", :verbose)
             # create machines path
             self.exec_vagrant_command("status", :silent)
@@ -108,6 +108,7 @@ module Vagrant
         protected
 
         def get_machine_paths()
+          #TODO: get from config
           Dir["#{self.config_path}/machines/*"]
         end
 
