@@ -3,6 +3,8 @@ module Vagrant
 
     class Cache
 
+      CACHE_VERSION = "#{Vagrant::Tools::VERSION}a"
+
       # attr_accessor :prefix, :verbose, :output, :options, :target, :cmd
       PATH = "#{ENV["HOME"]}/.vagrant-tools"
 
@@ -23,6 +25,11 @@ module Vagrant
         begin
           @output.append("reading cache file: `#{@filename}`", :verbose)
           json = JSON.parse(File.read(@filename), {symbolize_names: true})
+          if json.include?(:version)
+            raise "old config version" if json[:version] != CACHE_VERSION
+          else
+            raise "old config version"
+          end
           c_time = Time.at(json[:configs_date])
           @output.append("cache time: `#{c_time}`", :verbose)
           @delta = Cache.time_delta(c_time) #if json.include?(:configs_date)
@@ -38,6 +45,7 @@ module Vagrant
       def set_config(dirs)
         @output.append("writing to `#{@filename}`", :verbose)
         config_paths = {}
+        config_paths[:version] = CACHE_VERSION
         config_paths[:configs_date] = Time.now.to_i
         config_paths[:configs] = dirs.flat_map{|k,v| v.map(&:config_path)}
         flat_json = JSON.pretty_generate(config_paths)
