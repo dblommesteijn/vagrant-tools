@@ -47,7 +47,7 @@ $ vgctl some-project destroy testing
 
 * Current/ Master
 
-  * Fix indexing new Vagrantfile configuration https://github.com/dblommesteijn/vagrant-tools/issues/1
+  * Fix indexing new Vagrantfile configuration [#1](https://github.com/dblommesteijn/vagrant-tools/issues/1)
 
 
 ## Installation
