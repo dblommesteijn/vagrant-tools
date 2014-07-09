@@ -34,19 +34,7 @@ module Vagrant
           end
           return self
         end
-        # findin configs via find
-        cmd = "find \"#{prefix}\" -type f -name \"#{LOOKUP_DIR}\""
-        @output.append("finding vagrant configs: `#{cmd}`...", :verbose)
-        @output.flush()
-        Open3.popen3(cmd) do |stdin, stdout, stderr|
-          stdin.close_write
-          stdout.read.split("\n").each do |config_file|
-            # create new config instance
-            self.add_config_dirs(config_file)
-          end
-          stderr.close_read
-        end
-        self.cache.set_config(@dirs)
+        self.find_configs(prefix)
         self
       end
 
@@ -79,6 +67,22 @@ module Vagrant
         orm_config.offset = @dirs[n].size + 1 if @dirs[n].size > 0
         @dirs[n] << orm_config
         nil
+      end
+
+      def find_configs(prefix)
+        # findin configs via find
+        cmd = "find \"#{prefix}\" -type f -name \"#{LOOKUP_DIR}\""
+        @output.append("finding vagrant configs: `#{cmd}`...", :verbose)
+        @output.flush()
+        Open3.popen3(cmd) do |stdin, stdout, stderr|
+          stdin.close_write
+          stdout.read.split("\n").each do |config_file|
+            # create new config instance
+            self.add_config_dirs(config_file)
+          end
+          stderr.close_read
+        end
+        self.cache.set_config(@dirs)
       end
 
     end

@@ -18,19 +18,7 @@ module Vagrant
           self.hidden = self.hidden_path?(config_path)
           self.project_root = File.absolute_path("#{config_path}/../")
           self.vagrantfile = File.absolute_path("#{self.project_root}/Vagrantfile")
-          machine_paths = self.get_machine_paths()
-          @output.append("machine dirs found: #{machine_paths.size}", :verbose)
-          # lookup if machines path is created (else run vagrant status)
-          if !self.hidden && @cfg.refresh_cache
-            @output.append("reloading machine paths `vagrant status`", :verbose)
-            # create machines path
-            self.exec_vagrant_command("status", :silent)
-            machine_paths = self.get_machine_paths()
-          end
-          @machines = machine_paths.flat_map{|t| Machine.new(@cfg, @output, self, t)}
-          self.name = File.basename(File.absolute_path("#{config_path}/../"))
-          self.offset = 0
-          @output.append("found config: `#{self.config_path}`", :verbose)
+          self.populate_machine_list
         end
 
         def project_root_name
@@ -110,6 +98,22 @@ module Vagrant
           target = "#{self.project_root}/.vagrant/machines"
           return [] if !File.exists?(target)
           Dir["#{target}/*"]
+        end
+
+        def populate_machine_list
+          machine_paths = self.get_machine_paths()
+          @output.append("machine dirs found: #{machine_paths.size}", :verbose)
+          # lookup if machines path is created (else run vagrant status)
+          if !self.hidden && @cfg.refresh_cache
+            @output.append("reloading machine paths `vagrant status`", :verbose)
+            # create machines path
+            self.exec_vagrant_command("status", :silent)
+            machine_paths = self.get_machine_paths()
+          end
+          @machines = machine_paths.flat_map{|t| Machine.new(@cfg, @output, self, t)}
+          self.name = File.basename(File.absolute_path("#{config_path}/../"))
+          self.offset = 0
+          @output.append("found config: `#{self.config_path}`", :verbose)
         end
 
       end
