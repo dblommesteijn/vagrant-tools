@@ -178,7 +178,7 @@ usage: vgls [-pvxh] [TARGET]
   end
 
   # append cache status
-  if root.cache.cache_old?
+  if root.cache.cache_old? && !cfg.refresh_cache
     a = root.cache.cache_time_a
     output.append("cache is %dd, %dh, %dm, and %ds old (consider refreshing -x)" % a)
   elsif cfg.verbose
