@@ -1,0 +1,135 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
+require 'getoptlong'
+
+
+def main()
+  # configure vgtools
+  vgtools_cfg = Vagrant::Tools.config do |c|
+    # defaults
+    c.prefix = ENV["HOME"]
+    c.verbose = false
+    c.output = {machine: false, long: false, only_active: false}
+    c.target = nil
+    c.cmd = nil
+    c.refresh_cache = false
+    # parse regular commands with getopt
+    begin
+      opts = GetoptLong.new(
+        ['--prefix', '-p', GetoptLong::REQUIRED_ARGUMENT],
+        ['--verbose', '-v', GetoptLong::NO_ARGUMENT],
+        ['--refresh-cache', '-x', GetoptLong::NO_ARGUMENT],
+        ['--only-active', '-a', GetoptLong::NO_ARGUMENT],
+        ['--help', '-h', GetoptLong::NO_ARGUMENT],
+      )
+      opts.each do |opt, arg|
+        case opt
+          when '--prefix'
+            c.prefix = arg
+            c.refresh_cache = true
+          when '--verbose'
+            c.verbose = true
+          when '--refresh-cache'
+            c.refresh_cache = true
+          when '--help'
+            puts <<-EOF
+vgctl, version: #{Vagrant::Tools::VERSION}
+
+usage: vgfile [-pvxh] [TARGET [[cp | mv | rm] CONFIG]]
+
+  p : set lookup prefix (default $HOME)
+  v : verbose output
+  x : refresh cached results (.vagrant lookup)
+
+  TARGET : target a specific config (vagrantfile dir)
+
+  CONFIG : Vagrantfile configuration name
+  cp : copy configuration
+  mv : rename configuration
+  rm : remove configuration
+
+  h : show this help message
+
+EXAMPLE :
+  copy: default to d2: `vgfile vagrant-tools cp d d2`
+  rename: default to d2: `vgfile vagrant-tools mv d d2`
+  rm: d2: `vgfile vagrant-tools rm d2`
+            EOF
+          exit
+        else
+          puts "extra: " + opt + "|" + arg
+        end
+      end
+    rescue GetoptLong::InvalidOption => e
+      exit
+    end
+
+    # parse commands and targets (outside getopt)
+    ARGV.each_with_index do |arg, i|
+      case i
+      when 0
+        c.target = arg
+      when 1
+        c.cmd = ARGV[1..-1].join(" ")
+        break
+      end
+    end
+  end
+  # configuration
+  cfg = Vagrant::Tools.get_config
+  # output buffer
+  output = Vagrant::Tools::Output.new(cfg)
+  output.append("running `#{File.basename(__FILE__)}` in verbose mode (disable by removing [-v])", :verbose)
+  output.append(cfg.to_s, :verbose)
+
+  cfg = Vagrant::Tools.get_config
+  verify = vgtools_cfg.verify? do |errors|
+    # TODO: check for errors here!
+    # errors[:target] = "missing target option" if cfg.target.nil? || cfg.target == ""
+    # errors[:cmd] = "missing command option" if cfg.cmd.nil? || cfg.cmd == ""
+  end
+  unless verify
+    output.append(vgtools_cfg.error_messages.join(", "), :nonewline)
+    output.append(" (print help -h)")
+    output.render()
+    exit
+  end
+
+  # build root object from found configs (internal)
+  root = Vagrant::Tools::Root.new(cfg, output)
+  nodes = []
+
+  # TODO: build structure, focus only on Vagrantfile (when visiting)
+  # visit configs
+  root.visit() do |node|
+    if node.is_a?(Vagrant::Tools::Orm::Config)
+      nodes << node if node.match_target?(cfg.target)
+    end
+  end
+
+  begin
+    # verify config target, and run on one specific config
+    if nodes.empty?
+      output.append("target config not found: `#{cfg.target}`")
+    elsif nodes.size > 1
+      output.append("multiple configs found (this should never happen)")
+    else
+      output.append("executing: #{cfg.cmd}", :verbose)
+      # nodes.first.exec_vagrant_command(cfg.cmd)
+      # TODO: handle requests here!
+    end
+  rescue Exception => e
+    output.append(e.message)
+  end
+  output.render()
+end
+
+# entry point
+if File.basename(__FILE__) == File.basename($0)
+  begin
+    main()
+  rescue Interrupt
+    exit 0
+  end
+end
