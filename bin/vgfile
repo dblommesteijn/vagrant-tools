@@ -2,7 +2,8 @@
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/vagrant/tools")
 require 'getoptlong'
-
+require 'parser/current'
+require 'unparser'
 
 def main()
   # configure vgtools
@@ -116,6 +117,25 @@ EXAMPLE :
       output.append("multiple configs found (this should never happen)")
     else
       output.append("executing: #{cfg.cmd}", :verbose)
+
+      # read file and contents, parse
+      filename = nodes.first.vagrantfile
+      file_contents = File.read(filename)
+      p = Parser::CurrentRuby.parse(file_contents)
+
+      # p.children[2].children[0] ->  Vagrant.configure("2") do |config|
+      # puts p.children[2].children[2].to_a[0].inspect -> first config
+      # puts p.children[2].children[2].to_a[1].inspect -> second config
+
+      # TODO: lookup p.children for `Vagrant.configure do ...`
+      #   iterate p.children[x].children[2].XX with configs
+      #   copy contents of XX, rename XX, append p.children[x].children[2]
+
+      # write back changes
+      file_contents = Unparser.unparse(p)
+      File.write(filename, file_contents)
+      exit 1
+
       # nodes.first.exec_vagrant_command(cfg.cmd)
       # TODO: handle requests here!
     end
