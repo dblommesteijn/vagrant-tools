@@ -2,7 +2,7 @@
 
 Vagrant cli configuration management tool. The missing tool for vagrant that allows you to control all your vagrant instances. Use cli command: `vgls` to list all vagrant configs (all Vagrantfiles), and `vgctl [target] [vgcmd]` to control configurations from outside the Vagrantfile dir.
 
-[![Build Status](https://travis-ci.org/dblommesteijn/vagrant-tools.svg?branch=master)](https://travis-ci.org/dblommesteijn/vagrant-tools) [![Coverage Status](https://coveralls.io/repos/dblommesteijn/vagrant-tools/badge.png)](https://coveralls.io/r/dblommesteijn/vagrant-tools) [![Code Climate](https://codeclimate.com/github/dblommesteijn/vagrant-tools.png)](https://codeclimate.com/github/dblommesteijn/vagrant-tools) [![Dependency Status](https://gemnasium.com/dblommesteijn/vagrant-tools.svg)](https://gemnasium.com/dblommesteijn/vagrant-tools)
+[![Build Status](https://travis-ci.org/dblommesteijn/vagrant-tools.svg?branch=master)](https://travis-ci.org/dblommesteijn/vagrant-tools)  [![Code Climate](https://codeclimate.com/github/dblommesteijn/vagrant-tools.png)](https://codeclimate.com/github/dblommesteijn/vagrant-tools) [![Dependency Status](https://gemnasium.com/dblommesteijn/vagrant-tools.svg)](https://gemnasium.com/dblommesteijn/vagrant-tools)
 
 **Example**
 
