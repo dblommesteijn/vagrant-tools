@@ -31,6 +31,7 @@ module Vagrant
         def process
           return @process if !@process.nil? || self.id.nil?
           Helper.iterate_processes do |p|
+            next if p.cmdline.nil?
             @process = p if p.cmdline.include?(self.id)
           end
           @process
