@@ -47,12 +47,15 @@ $ vgctl some-project destroy testing
   * Add option to switch to .config path `vgctl target-box shell`
   * Filter show only zombies
 
-* Current/ Master
+* Version (0.1.2)
 
   * Fix indexing new Vagrantfile configuration [#1](https://github.com/dblommesteijn/vagrant-tools/issues/1)
   * Fix VERSION variable warning
   * Fix skip empty process cmdline
 
+* Current/ Master
+
+  * stub
 
 ## Installation
 
