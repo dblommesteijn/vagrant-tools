@@ -97,8 +97,8 @@ vgctl
 Verbose, this will output operations to STDOUT
 
 ```bash
-vgls -v
-vgctl -v
+vgls -V
+vgctl -V
 ```
 
 Change target configuration (find operation), base from where .vagrant configs are discovered:

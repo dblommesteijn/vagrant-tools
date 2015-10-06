@@ -19,12 +19,13 @@ def main()
     begin
       opts = GetoptLong.new(
         ['--prefix', '-p', GetoptLong::REQUIRED_ARGUMENT],
-        ['--verbose', '-v', GetoptLong::NO_ARGUMENT],
+        ['--verbose', '-V', GetoptLong::NO_ARGUMENT],
         ['--refresh-cache', '-x', GetoptLong::NO_ARGUMENT],
         ['--only-active', '-a', GetoptLong::NO_ARGUMENT],
         ['--zombies', '-z', GetoptLong::NO_ARGUMENT],
-        ['--vagrantfile', '-V', GetoptLong::NO_ARGUMENT],
+        ['--vagrantfile', '-F', GetoptLong::NO_ARGUMENT],
         ['--help', '-h', GetoptLong::NO_ARGUMENT],
+        ['--version', '-v', GetoptLong::NO_ARGUMENT],
       )
       opts.each do |opt, arg|
         case opt
@@ -57,6 +58,9 @@ usage: vgls [-pvxh] [TARGET]
 
   h : show this help message
             EOF
+          exit
+        when '--version'
+          print "vagrant-tools: %s\r\n" % Vagrant::Tools::VERSION
           exit
         end
       end
